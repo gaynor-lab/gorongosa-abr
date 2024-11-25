@@ -1,0 +1,14 @@
+Feeding
+Grooming
+Freezing
+Resting
+Walking (w/o vigilance)
+Fleeing
+Climbing
+Agression
+Social interactions
+occluded
+Staring (not walking)
+Scanning (not walking)
+walking with vigilance
+startling
