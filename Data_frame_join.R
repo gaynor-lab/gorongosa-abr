@@ -104,10 +104,14 @@ colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Other.species.presen
 #rename behaviour labels
 Final_2021 <- merged_clean_2021 %>%
   mutate(Behaviour = case_when(
-    Behaviour == "Walking (w/o vigilance)" ~ "Walking non-vigilant",
+    Behaviour == "Walking (w/o vigilance)" ~ "Walking_NV",
     Behaviour == "Staring (not walking)" ~ "Staring",
     Behaviour == "Scanning (not walking)" ~ "Scanning",
     Behaviour == "Fleeing" ~ "Flight",
+    Behaviour == "Social interactions" ~ "Social_interactions",
+    Behaviour == "occluded" ~ "Occluded",
+    Behaviour == "walking with vigilance" ~ "Walking_V",
+    Behaviour == "startling" ~ "Startling",
     TRUE ~ Behaviour  # Keep all other values unchanged
   ))
 
