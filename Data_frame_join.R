@@ -115,6 +115,27 @@ Final_2021 <- merged_clean_2021 %>%
     TRUE ~ Behaviour  # Keep all other values unchanged
   ))
 
+#Fix leopard typo
+Final_2021 <- Final_2021 %>%
+  mutate(Predator.cue = str_replace(Predator.cue, "Leo\\[ard", "Leopard"))
+
+#Rename NA predator cues to No_sound
+Final_2021 <- Final_2021 %>%
+  mutate(Predator.cue = if_else(is.na(Predator.cue), "No_sound", Predator.cue))
+
+#checking if all videos were transferred in join
+unique_values <- unique(Final_2021$file_name)
+num_unique_values <- length(unique_values)
+num_unique_values
+# 570 - missing 13
+
+#checking number in annotations.xml dataframe
+unique_values_annotations <- unique(frame_df2$file_name)
+num_unique_values_annotations <- length(unique_values_annotations)
+num_unique_values_annotations
+#570 - missing 13
+
+
 View(Final_2021)
 
 
