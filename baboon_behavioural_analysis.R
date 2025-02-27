@@ -60,7 +60,39 @@ Baboon_flight_data_predatorcue <- Baboon_flight_data %>%
 View(Baboon_flight_data_predatorcue)
 View(Baboon_flight_data)
 
-#Bar graph
+#calculate 95% confidence intervals 
+Baboon_flight_data_predatorcue <- Baboon_flight_data %>%
+  group_by(Predator.cue) %>%
+  summarise(
+    mean_latency_to_flee = mean(latency_to_flee_s, na.rm = TRUE),
+    sd_latency_to_flee = sd(latency_to_flee_s, na.rm = TRUE),
+    n = n_distinct(file_name)
+  ) %>%
+  mutate(
+    se = sd_latency_to_flee / sqrt(n),  # Standard Error
+    t_value = qt(0.975, df = n - 1),  # t-critical for 95% CI
+    ci_95 = t_value * se  # Confidence Interval
+  )
+
+
+#BAR GRAPH FOR FLIGHT BY PREDATOR CUE
+#filter data to remove No_sound group and reorder predator cues
+Baboon_flight_data_predatorcue <- Baboon_flight_data_predatorcue %>%
+  filter(Predator.cue != "No_sound") %>%
+  mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","WD","Hyena", "Control")))  # Adjust Cue names as needed
+
+ggplot(Baboon_flight_data_predatorcue, aes(x = Predator.cue, y = mean_latency_to_flee, fill = Predator.cue)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = mean_latency_to_flee - ci_95, ymax = mean_latency_to_flee + ci_95), 
+                width = 0.2) +
+  labs(title = "Mean Latency to Flee by Predator Cue",
+       x = "Predator Cue",
+       y = "Mean Latency to Flight (seconds)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank()) 
+
+
 ggplot(Baboon_flight_data_predatorcue, aes(x = Predator.cue, y = mean_latency_to_flee, fill = Predator.cue)) +
   geom_bar(stat = "identity", position = "dodge") +
   labs(title = "Mean Latency to Flee by Predator Cue",
