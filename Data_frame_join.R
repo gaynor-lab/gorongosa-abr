@@ -112,6 +112,7 @@ Final_2021 <- merged_clean_2021 %>%
     Behaviour == "occluded" ~ "Occluded",
     Behaviour == "walking with vigilance" ~ "Walking_V",
     Behaviour == "startling" ~ "Startling",
+    Behaviour == "standing and staring" ~ "Stand_stare",
     TRUE ~ Behaviour  # Keep all other values unchanged
   ))
 
