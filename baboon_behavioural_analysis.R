@@ -19,18 +19,65 @@ Baboon_behaviour_data %>%
   ungroup()
 
 
-#create new column where Walking_V, Staring, Scanning = Vigilant, Flight = Flight, Occluded = Occluded, and any other behaviour is Non_vigilant
+#create new column where Walking_V, Staring, standing and staring, Scanning = Vigilant, Flight = Flight, Occluded = Occluded, and any other behaviour is Non_vigilant
 Baboon_behaviour_data <- Baboon_behaviour_data %>%
   mutate(behaviour_class = case_when(
-    Behaviour %in% c("Walking_V", "Staring", "Scanning") ~ "Vigilant",
+    Behaviour %in% c("Walking_V", "Staring", "Scanning","Stand_stare") ~ "Vigilant",
     Behaviour == "Flight" ~ "Flight",
     Behaviour == "Occluded" ~ "Occluded",
     TRUE ~ "Non_vigilant"
   ))
 
+#calculate proportion time spent vigilant 
+Baboon_behaviour_data <- Baboon_behaviour_data %>%
+  group_by(file_name) %>%
+  mutate(
+    total_frames = n(),  # Count total frames per file_name
+    vigilant_frames = sum(behaviour_class == "Vigilant", na.rm = TRUE),  # Count Vigilant frames
+    occluded_frames = sum(behaviour_class == "Occluded", na.rm = TRUE),  # Count Occluded frames
+    proportion_vigilant = vigilant_frames / (total_frames - occluded_frames)  # Compute proportion
+  ) %>%
+  ungroup() 
+
+#calculate mean proportion of vigilance by predator cue
+Baboon_vigilance_predatorcue <- Baboon_behaviour_data %>%
+  group_by(Predator.cue) %>%
+  summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE))
+View(Baboon_vigilance_predatorcue)
+
+#calculate 95% confidence intervals 
+Baboon_vigilance_predatorcue <- Baboon_behaviour_data %>%
+  group_by(Predator.cue) %>%
+  summarise(
+    mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE),  # ✅ Removed extra )
+    sd_proportion_vigilant = sd(proportion_vigilant, na.rm = TRUE),
+    n = n_distinct(file_name)  # ✅ Count unique file names
+  ) %>%
+  mutate(
+    se = sd_proportion_vigilant / sqrt(n),  # Standard Error
+    t_value = qt(0.975, df = n - 1),  # t-critical for 95% CI
+    ci_95 = t_value * se  # Confidence Interval
+  )
+
+#reorganize data structure
+#filter data to remove No_sound group and reorder predator cues
+Baboon_vigilance_predatorcue <- Baboon_vigilance_predatorcue %>%
+  filter(Predator.cue != "No_sound") %>%
+  mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control")))  # Adjust Cue names as needed
+
+#Create bar graph for proportion of vigilance by predatorcue
+ggplot(Baboon_vigilance_predatorcue, aes(x = Predator.cue, y = mean_proportion_vigilant, fill = Predator.cue)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = mean_proportion_vigilant - ci_95, ymax = mean_proportion_vigilant + ci_95), 
+                width = 0.2) +
+  labs(title = "Mean proportion of time spent vigilant by predator cue",
+       x = "Predator Cue",
+       y = "Mean proportion of vigilance (seconds)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank()) 
 
 #FOR FLIGHT ANALYSIS
-
 #Make dataframe with just videos where flight is present
 Baboon_flight_data <- Baboon_behaviour_data %>%
   filter(flight_present == 1)
@@ -93,10 +140,37 @@ ggplot(Baboon_flight_data_predatorcue, aes(x = Predator.cue, y = mean_latency_to
         panel.grid = element_blank()) 
 
 
-ggplot(Baboon_flight_data_predatorcue, aes(x = Predator.cue, y = mean_latency_to_flee, fill = Predator.cue)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(title = "Mean Latency to Flee by Predator Cue",
-       x = "Predator Cue",
-       y = "Mean Latency to Flight (seconds)") +
+#Make frame for frequency of flight
+flight_frequency <- Baboon_behaviour_data %>%
+  group_by(Predator.cue, file_name) %>%  # Group by Predator.cue and file_name
+  summarise(flight_present = max(flight_present), .groups = "drop") %>%  # Check if flight ever happened in each file
+  group_by(Predator.cue) %>%
+  summarise(
+    flight_yes = sum(flight_present == 1),  # Count unique files where flight happened
+    flight_no = sum(flight_present == 0),   # Count unique files where flight didn't happen
+    proportion_flight = flight_yes / (flight_yes + flight_no)  # Calculate proportion of flight events
+  )
+
+#calculate 95% CI
+flight_frequency <- flight_frequency %>%
+  mutate(
+    proportion_flight = as.numeric(proportion_flight),  # Ensure proportion_flight is numeric
+    n = as.numeric(n),  # Ensure n is numeric
+    se = sqrt((proportion_flight * (1 - proportion_flight)) / n),  # Standard error
+    lower_ci = proportion_flight - 1.96 * se,  # Lower bound of 95% CI
+    upper_ci = proportion_flight + 1.96 * se   # Upper bound of 95% CI
+  )
+
+#plot it
+ggplot(flight_frequency, aes(x = Predator.cue, y = proportion_flight, fill = Predator.cue)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Proportion of Flight Responses by Predator Cue",
+    x = "Predator Cue",
+    y = "Proportion of Files with Flight"
+  ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+
+
+
