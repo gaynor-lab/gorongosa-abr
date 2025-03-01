@@ -142,35 +142,38 @@ ggplot(Baboon_flight_data_predatorcue, aes(x = Predator.cue, y = mean_latency_to
 
 #Make frame for frequency of flight
 flight_frequency <- Baboon_behaviour_data %>%
-  group_by(Predator.cue, file_name) %>%  # Group by Predator.cue and file_name
-  summarise(flight_present = max(flight_present), .groups = "drop") %>%  # Check if flight ever happened in each file
+  group_by(Predator.cue, file_name) %>%  
+  summarise(flight_present = max(flight_present), .groups = "drop") %>%  
   group_by(Predator.cue) %>%
   summarise(
     flight_yes = sum(flight_present == 1),  # Count unique files where flight happened
     flight_no = sum(flight_present == 0),   # Count unique files where flight didn't happen
-    proportion_flight = flight_yes / (flight_yes + flight_no)  # Calculate proportion of flight events
-  )
-
-#calculate 95% CI
-flight_frequency <- flight_frequency %>%
-  mutate(
-    proportion_flight = as.numeric(proportion_flight),  # Ensure proportion_flight is numeric
-    n = as.numeric(n),  # Ensure n is numeric
+    n = flight_yes + flight_no,  # Total unique files per predator cue
+    proportion_flight = flight_yes / n,  # Calculate proportion of flight events
     se = sqrt((proportion_flight * (1 - proportion_flight)) / n),  # Standard error
     lower_ci = proportion_flight - 1.96 * se,  # Lower bound of 95% CI
     upper_ci = proportion_flight + 1.96 * se   # Upper bound of 95% CI
   )
 
+
 #plot it
+
+#filter data to remove No_sound group and reorder predator cues
+flight_frequency <- flight_frequency %>%
+  filter(Predator.cue != "No_sound") %>%
+  mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control")))  # Adjust Cue names as needed
+
 ggplot(flight_frequency, aes(x = Predator.cue, y = proportion_flight, fill = Predator.cue)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", position = "dodge") +  # Bar plot
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width = 0.2, color = "black") +  # Add error bars
   labs(
     title = "Proportion of Flight Responses by Predator Cue",
     x = "Predator Cue",
-    y = "Proportion of Files with Flight"
+    y = "Frequency Flight"
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+
 
 
 
