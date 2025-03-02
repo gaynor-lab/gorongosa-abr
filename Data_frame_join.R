@@ -120,6 +120,18 @@ Final_2021 <- merged_clean_2021 %>%
 Final_2021 <- Final_2021 %>%
   mutate(Predator.cue = str_replace(Predator.cue, "Leo\\[ard", "Leopard"))
 
+#Fix cheetah typo
+Final_2021 <- Final_2021 %>%
+  mutate(Predator.cue = str_replace(Predator.cue, "Cheeetah", "Cheetah"))
+
+#Fix control typo
+Final_2021 <- Final_2021 %>%
+  mutate(Predator.cue = str_replace(Predator.cue, "Control ", "Control"))
+
+#Rename WD to Wild_dog
+Final_2021 <- Final_2021 %>%
+  mutate(Predator.cue = str_replace(Predator.cue, "WD", "Wild_dog"))
+
 #Rename NA predator cues to No_sound
 Final_2021 <- Final_2021 %>%
   mutate(Predator.cue = if_else(is.na(Predator.cue), "No_sound", Predator.cue))
@@ -128,14 +140,13 @@ Final_2021 <- Final_2021 %>%
 unique_values <- unique(Final_2021$file_name)
 num_unique_values <- length(unique_values)
 num_unique_values
-# 570 - missing 13
+# 570 
 
 #checking number in annotations.xml dataframe
 unique_values_annotations <- unique(frame_df2$file_name)
 num_unique_values_annotations <- length(unique_values_annotations)
 num_unique_values_annotations
-#570 - missing 13
-
+#570 
 
 View(Final_2021)
 
