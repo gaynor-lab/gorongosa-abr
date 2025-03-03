@@ -150,6 +150,13 @@ num_unique_values_annotations
 
 View(Final_2021)
 
+unique_values <- unique(Final_2021$`Task ID`)
+num_unique_values <- length(unique_values)
+num_unique_values
+
+unique_values_annotations <- unique(frame_df2$task_id)
+num_unique_values_annotations <- length(unique_values_annotations)
+num_unique_values_annotations
 
 
 
