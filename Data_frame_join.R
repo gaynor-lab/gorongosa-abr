@@ -1,13 +1,12 @@
 #Joining dataframes 
 
-#CVAT1.1 format
+#CVAT1.1 format - USE THIS FORMAT
 install.packages("xml2")
 library(xml2)
 Baboon_2021_vid_CVAT <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_cvat for video 1.1/annotations.xml")
 Baboon_2021_vid_CVAT
 
-#MOT1.1 format
-
+#MOT1.1 format 
 #Read the data in 
 Baboon_2021_data_MOT <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_mot 1.1/gt/gt.txt", header = FALSE)
 View(Baboon_2021_data_MOT)
@@ -15,7 +14,7 @@ View(Baboon_2021_data_MOT)
 colnames(Baboon_2021_data_MOT) <- c("frame_id","track_id", "x", "y","w","h","not_ignored","class_id","visibility")
 
 #Second watch data
-B_21_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/Baboon_second_watch_2021.csv")
+B_21_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/Baboon_second_watch_FINAL - 2021.csv")
 
 #make file name column
 library(dplyr)
@@ -94,12 +93,12 @@ merged_clean_2021 <- merged_clean_2021_1 %>% select(- Notes..here.could.record.a
 View(merged_clean_2021)
 
 #rename columns
-colnames(merged_clean_2021)[colnames(merged_clean_2021) == "task_id"] <- "Task ID"
+colnames(merged_clean_2021)[colnames(merged_clean_2021) == "task_id"] <- "Task_ID"
 colnames(merged_clean_2021)[colnames(merged_clean_2021) == "label"] <- "Behaviour"
-colnames(merged_clean_2021)[colnames(merged_clean_2021) == "File.name"] <- "Video name"
-colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Sound.quality...Good..Poor..None"] <- "Sound quality"
-colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Sound.delay..s."] <- "Sound delay (s)"
-colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Other.species.present..list.w.commas."] <- "Other species present"
+colnames(merged_clean_2021)[colnames(merged_clean_2021) == "File.name"] <- "file_name"
+colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Sound.quality...Good..Poor..None"] <- "Sound_quality"
+colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Sound.delay..s."] <- "Sound_delay_s"
+colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Other.species.present..list.w.commas."] <- "Other_species_present"
 
 #rename behaviour labels
 Final_2021 <- merged_clean_2021 %>%
@@ -150,6 +149,7 @@ num_unique_values_annotations
 
 View(Final_2021)
 
+
 unique_values <- unique(Final_2021$`Task ID`)
 num_unique_values <- length(unique_values)
 num_unique_values
@@ -157,7 +157,6 @@ num_unique_values
 unique_values_annotations <- unique(frame_df2$task_id)
 num_unique_values_annotations <- length(unique_values_annotations)
 num_unique_values_annotations
-
 
 
 

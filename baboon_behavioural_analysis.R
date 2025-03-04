@@ -6,15 +6,6 @@ install.packages("paletteer")
 library(paletteer) #for colour scheme
 
 #DATA OVERVIEW
-View(Baboon_flight_data_grouped)
-View(site_counts)
-View(Baboon_vigilance_habitat)
-View(Final_2021)
-
-Video_grouped <- Final_2021 %>%
-  select(-c(Behaviour,`Task ID`, frame)) %>%  # Remove the specified column
-  group_by(file_name)
-View(Video_grouped)
 #number of videos by camera trap
 site_counts <- Baboon_behaviour_data %>%
   group_by(Camera.trap.site) %>%
@@ -29,6 +20,9 @@ Baboon_behaviour_data <- Final_2021 %>%
   ungroup()
 View(Baboon_behaviour_data)
 
+na_rows <- Baboon_behaviour_data %>%
+  filter(is.na(Camera.trap.site))
+View(na_rows)
 #Count how many file_name have flight and how many do not
 Baboon_behaviour_data %>%
   group_by(flight_present) %>%
