@@ -1,10 +1,15 @@
 #Joining dataframes 
 
-#CVAT1.1 format - USE THIS FORMAT
+#load packages
 install.packages("xml2")
 library(xml2)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(tidyverse)
+
+#CVAT1.1 format - USE THIS FORMAT
 Baboon_2021_vid_CVAT <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_cvat for video 1.1/annotations.xml")
-Baboon_2021_vid_CVAT
 
 #MOT1.1 format 
 #Read the data in 
@@ -14,17 +19,13 @@ View(Baboon_2021_data_MOT)
 colnames(Baboon_2021_data_MOT) <- c("frame_id","track_id", "x", "y","w","h","not_ignored","class_id","visibility")
 
 #Second watch data
-B_21_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/Baboon_second_watch_FINAL - 2021.csv")
+B_21_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/gorongosa-abr/Baboon_second_watch_FINAL - 2021.csv")
 
 #make file name column
-library(dplyr)
 B_21_second<- B_21_second %>%
-  mutate(file_name = paste(Year, Camera.trap.site, File.name, sep = "_"))
-View(B_21_second)
-#Convert XML to dataframe
-library(xml2)
-library(tidyverse)
+  mutate(file_name = paste(Year, Camera.trap.site, video_name, sep = "_"))
 
+#Convert XML to dataframe
 xml_file <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_cvat for video 1.1/annotations.xml")
 
 # Extract all <record> nodes
@@ -47,7 +48,6 @@ task_df <- map_df(tasks, ~{
   )
 })
 head(task_df)
-
 
 # Extract all <track> nodes
 tracks <- xml_find_all(xml_file, ".//track")
@@ -75,10 +75,6 @@ frame_df2 <- left_join(frame_df, task_df)
 colnames(frame_df2)[colnames(frame_df2) == "task_name"] <- "file_name"
 View(frame_df2)
 
-#Join datasets
-#using dplyr
-library(dplyr)
-
 # Join datasets based on filename
 merged_df <- frame_df2 %>%
   left_join(B_21_second, by = "file_name")
@@ -90,12 +86,10 @@ view(merged_df)
 #remove unncessary columns
 merged_clean_2021_1 <- merged_df %>% select(-X)
 merged_clean_2021 <- merged_clean_2021_1 %>% select(- Notes..here.could.record.anything.unusual.and.also.notes.about.interspecies.interactions..)
-View(merged_clean_2021)
 
 #rename columns
 colnames(merged_clean_2021)[colnames(merged_clean_2021) == "task_id"] <- "Task_ID"
 colnames(merged_clean_2021)[colnames(merged_clean_2021) == "label"] <- "Behaviour"
-colnames(merged_clean_2021)[colnames(merged_clean_2021) == "File.name"] <- "file_name"
 colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Sound.quality...Good..Poor..None"] <- "Sound_quality"
 colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Sound.delay..s."] <- "Sound_delay_s"
 colnames(merged_clean_2021)[colnames(merged_clean_2021) == "Other.species.present..list.w.commas."] <- "Other_species_present"

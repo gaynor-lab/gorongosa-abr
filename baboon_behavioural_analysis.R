@@ -1,16 +1,19 @@
 #Behavioural analysis 
 
 #load packages
-library(dplyr)
 install.packages("paletteer")
-library(paletteer) #for colour scheme
+library(paletteer)#for colour scheme
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(tidyverse)
 
 #DATA OVERVIEW
 #number of videos by camera trap
 site_counts <- Baboon_behaviour_data %>%
   group_by(Camera.trap.site) %>%
   summarise(unique_files = n_distinct(file_name), .groups = "drop")
-
+View(site_counts)
 #DATAFRAME FOR VIGILANCE ANALYSIS
 
 #create column by grouping videos by file_name and then labeling them with 0 if no flight present and 1 if flight present
@@ -20,9 +23,11 @@ Baboon_behaviour_data <- Final_2021 %>%
   ungroup()
 View(Baboon_behaviour_data)
 
+#there is still 6 missing videos that i cannot find 
 na_rows <- Baboon_behaviour_data %>%
   filter(is.na(Camera.trap.site))
 View(na_rows)
+
 #Count how many file_name have flight and how many do not
 Baboon_behaviour_data %>%
   group_by(flight_present) %>%
@@ -119,7 +124,8 @@ Baboon_vigilance_predatorcue2 <- Baboon_behaviour_data %>%
   group_by(Predator.cue, file_name) %>%
   summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE))
 
-View(Baboon_vigilance_predatorcue2)
+#correct NaN values to 0
+Baboon_vigilance_predatorcue2$mean_proportion_vigilant[is.nan(Baboon_vigilance_predatorcue2$mean_proportion_vigilant)] <- 0
 
 #filter data to remove No_sound group and reorder predator cues
 Baboon_vigilance_predatorcue2 <- Baboon_vigilance_predatorcue2 %>%
@@ -228,11 +234,11 @@ flight_frequency_pred <- Baboon_behaviour_data %>%
 
 #Bar graph for proportion of flight by predator cue 
 #filter data to remove No_sound group and reorder predator cues
-flight_frequency <- flight_frequency %>%
+flight_frequency_pred <- flight_frequency_pred %>%
   filter(Predator.cue != "No_sound") %>%
   mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control")))  # Adjust Cue names as needed
 
-ggplot(flight_frequency, aes(x = Predator.cue, y = proportion_flight, fill = Predator.cue)) +
+ggplot(flight_frequency_pred, aes(x = Predator.cue, y = proportion_flight, fill = Predator.cue)) +
   geom_bar(stat = "identity", position = "dodge") +  # Bar plot
   geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width = 0.2, color = "black") +  # Add error bars
   labs(
@@ -251,7 +257,7 @@ ggplot(flight_frequency, aes(x = Predator.cue, y = proportion_flight, fill = Pre
 
 #HABITAT TYPE ANALYSIS
 #create new column with habitat type
-Baboon_flight_data <- Baboon_flight_data %>%
+Baboon_behaviour_data <- Baboon_behaviour_data %>%
   mutate(Habitat = case_when(
     Camera.trap.site %in% c("E02", "F01", "F03","F07","I04","J03","J13","N03","N10","N11") ~ "Open",
     Camera.trap.site %in% c("D05", "D09","E08","G06","G08","I06","I08","I10","L11") ~ "Closed",
@@ -260,8 +266,9 @@ Baboon_flight_data <- Baboon_flight_data %>%
 #HABITAT TYPE VIGILANCE
 #group by habitat type
 Baboon_vigilance_habitat <- Baboon_behaviour_data %>%
+  filter(!is.na(Habitat)) %>%  # Exclude NA values
   group_by(Habitat, file_name, Camera.trap.site) %>%
-  summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE))
+  summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE), .groups = "drop")
 View(Baboon_vigilance_habitat)
 
 #strip plot for proportion vigilance by habitat type
@@ -282,22 +289,10 @@ ggplot(Baboon_vigilance_habitat, aes(x = Habitat, y = mean_proportion_vigilant, 
 #HABITAT TYPE FLIGHT
 #Calculate mean latency to flight by habitat type
 Baboon_flight_data_habitat <- Baboon_flight_data %>%
+  filter(!is.na(Habitat)) %>% 
   group_by(Habitat, file_name) %>%
   summarize(mean_latency_to_flee = mean(latency_to_flee_s, na.rm = TRUE), .groups = "drop") %>%  # Keep pipeline open
   filter(file_name != "2021_F07_07220010_Baboon.AVI") 
-
-ggplot(Baboon_flight_data_habitat, aes(x = Habitat, y = mean_latency_to_flee, fill = Habitat, color = Habitat)) +
-  geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
-  geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
-  scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
-  scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for box fill
-  labs(title = "Latency to Flee by Predator Cue",
-       x = "Habitat type",
-       y = "Latency to Flee (seconds)") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        panel.grid = element_blank(),
-        legend.position = "none") 
 
 #Strip plot for latency to flight by habitat type
 ggplot(Baboon_flight_data_habitat, aes(x = Habitat, y = mean_latency_to_flee, fill = Habitat, color = Habitat)) +
@@ -305,7 +300,7 @@ ggplot(Baboon_flight_data_habitat, aes(x = Habitat, y = mean_latency_to_flee, fi
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for box fill
-  labs(title = "Latency to Flee by Predator Cue",
+  labs(title = "Latency to Flee by habitat type",
        x = "Habitat type",
        y = "Latency to Flee (seconds)") +
   theme_minimal() +
@@ -316,6 +311,7 @@ ggplot(Baboon_flight_data_habitat, aes(x = Habitat, y = mean_latency_to_flee, fi
 
 #frequency of flight by habitat type
 flight_frequency_habitat <- Baboon_behaviour_data %>%
+  filter(!is.na(Habitat)) %>% 
   group_by(Habitat, file_name) %>%  
   summarise(flight_present = max(flight_present), .groups = "drop") %>%  
   group_by(Habitat) %>%
@@ -350,8 +346,9 @@ ggplot(flight_frequency_habitat, aes(x = Habitat, y = proportion_flight, fill = 
 #PREY IDENTITY ANALYSIS - AGE/SEX
 
 #PREY IDENTITY VIGILANCE
-#group by habitat type
+#group by age and sex class
 Baboon_vigilance_age_sex <- Baboon_behaviour_data %>%
+  filter(!is.na(Focal.individual.sex)) %>% 
   group_by(file_name, Focal.individual.sex, Focal.individual.age) %>%
   summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE))
 View(Baboon_vigilance_age_sex)
@@ -382,7 +379,7 @@ ggplot(Baboon_vigilance_age_sex, aes(x = Age_sex_Category, y = mean_proportion_v
 
 #PREY IDENTITY FLIGHT
 #create column for age and sex class in flight data
-Baboon_flight_age_sex <- Baboon_flight_data %>%
+Baboon_behaviour_data <- Baboon_behaviour_data %>%
   mutate(Age_sex_Category = case_when(
     Focal.individual.sex == "J" & Focal.individual.age == "J" ~ "Juvenile",
     Focal.individual.sex == "F" & Focal.individual.age == "A" ~ "Female_Adult",
@@ -390,11 +387,12 @@ Baboon_flight_age_sex <- Baboon_flight_data %>%
     TRUE ~ NA_character_  # Default if nothing matches
   ))
 
+
 View(Baboon_flight_age_sex)
 #Calculate mean latency to flight by age_sex_class
 Baboon_flight_age_sex <- Baboon_flight_age_sex %>%
+  filter(!is.na(Age_sex_Category)) %>%
   group_by(file_name, Age_sex_Category) %>%
-  summarize(mean_latency_to_flee = mean(latency_to_flee_s, na.rm = TRUE), .groups = "drop") %>%  # Keep pipeline open
   filter(file_name != "2021_F07_07220010_Baboon.AVI") 
 
 #Strip plot for latency to flight by age sex class
@@ -414,6 +412,7 @@ ggplot(Baboon_flight_age_sex, aes(x = Age_sex_Category, y = mean_latency_to_flee
 
 #frequency of flight by age and sex class
 flight_frequency_age_sex <- Baboon_behaviour_data %>%
+  filter(!is.na(Age_sex_Category)) %>%
   group_by(file_name, Age_sex_Category) %>%  
   summarise(flight_present = max(flight_present), .groups = "drop") %>%  
   group_by(Age_sex_Category) %>%
@@ -443,6 +442,4 @@ ggplot(flight_frequency_age_sex, aes(x = Age_sex_Category, y = proportion_flight
     panel.grid = element_blank(),  # Removes all grid lines
     axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
   )
-
-
 

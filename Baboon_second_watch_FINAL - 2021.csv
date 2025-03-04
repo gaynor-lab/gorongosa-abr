@@ -1,4 +1,4 @@
-Year,Camera trap site,File name,Predator cue ,"Sound quality - Good, Poor, None",Sound delay (s),Focal individual sex,Focal individual age,Number of individuals ,Alarm calling by focal individual,Alarm calling by other individual,Presence of offspring,Other species present (list w commas),Day or night,Video duration (s),Notes (here could record anything unusual and also notes about interspecies interactions ),
+Year,Camera trap site,video_name,Predator cue ,"Sound quality - Good, Poor, None",Sound delay (s),Focal individual sex,Focal individual age,Number of individuals ,Alarm calling by focal individual,Alarm calling by other individual,Presence of offspring,Other species present (list w commas),Day or night,Video duration (s),Notes (here could record anything unusual and also notes about interspecies interactions ),
 2021,N11,07100008_Baboon.AVI,Lion,Good,None,F,A,1,None,None,None,NA,Day     ,30,,
 2021,N11,08030104_Baboon.AVI,Lion,Good,None,J,J,1,None,None,None,NA,Day,30,,
 2021,N11,07080025_Baboon.AVI,Lion,Good,None,M,A,1,None,None,None,NA,Day,30,,
