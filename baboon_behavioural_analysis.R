@@ -6,7 +6,15 @@ install.packages("paletteer")
 library(paletteer) #for colour scheme
 
 #DATA OVERVIEW
+View(Baboon_flight_data_grouped)
+View(site_counts)
+View(Baboon_vigilance_habitat)
+View(Final_2021)
 
+Video_grouped <- Final_2021 %>%
+  select(-c(Behaviour,`Task ID`, frame)) %>%  # Remove the specified column
+  group_by(file_name)
+View(Video_grouped)
 #number of videos by camera trap
 site_counts <- Baboon_behaviour_data %>%
   group_by(Camera.trap.site) %>%
@@ -258,7 +266,7 @@ Baboon_flight_data <- Baboon_flight_data %>%
 #HABITAT TYPE VIGILANCE
 #group by habitat type
 Baboon_vigilance_habitat <- Baboon_behaviour_data %>%
-  group_by(Habitat, file_name) %>%
+  group_by(Habitat, file_name, Camera.trap.site) %>%
   summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE))
 View(Baboon_vigilance_habitat)
 
