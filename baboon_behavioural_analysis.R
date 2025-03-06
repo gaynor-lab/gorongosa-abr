@@ -61,7 +61,8 @@ Baboon_flight_data <- Baboon_behaviour_data %>%
   filter(flight_present == 1)
 View(Baboon_flight_data)
 
-#Calculate how many frames until flight
+#Calculate how many frames until flight - INCORRECT
+#frames are actually ordered from last to first 
 Baboon_flight_data <- Baboon_flight_data %>%
   group_by(file_name) %>%
   mutate(
@@ -73,6 +74,9 @@ Baboon_flight_data <- Baboon_flight_data %>%
   group_by(file_name) %>%
   mutate(rows_until_flight = min(rows_until_flight, na.rm = TRUE)) %>%
   ungroup()
+
+
+#Calculate how many
 
 #convert frames until seconds = latency by dividing by 30 bc 1s = 30 frames
 Baboon_flight_data <- Baboon_flight_data %>%
@@ -131,7 +135,7 @@ Baboon_vigilance_predatorcue2$mean_proportion_vigilant[is.nan(Baboon_vigilance_p
 Baboon_vigilance_predatorcue2 <- Baboon_vigilance_predatorcue2 %>%
   filter(Predator.cue != "No_sound") %>%
   mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control")))  # Adjust Cue names as needed
-
+View(Baboon_vigilance_predatorcue2)
 #Strip plot for proportion of vigilance by predator cue
 ggplot(Baboon_vigilance_predatorcue2, aes(x = Predator.cue, y = mean_proportion_vigilant, fill = Predator.cue, color = Predator.cue)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
@@ -231,6 +235,7 @@ flight_frequency_pred <- Baboon_behaviour_data %>%
     upper_ci = proportion_flight + 1.96 * se   # Upper bound of 95% CI
   )
 
+View(flight_frequency_pred)
 
 #Bar graph for proportion of flight by predator cue 
 #filter data to remove No_sound group and reorder predator cues
@@ -254,6 +259,95 @@ ggplot(flight_frequency_pred, aes(x = Predator.cue, y = proportion_flight, fill 
     legend.position = "none",  # Remove legend
     axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
   )
+
+#Grouped bar graph for frequency of flight 
+# Reshape data to long format for ggplot
+flight_frequency_long <- flight_frequency_pred %>%
+  select(Predator.cue, flight_yes, flight_no) %>%
+  pivot_longer(cols = c(flight_yes, flight_no), 
+               names_to = "Flight_Response", 
+               values_to = "Count") 
+
+# Create grouped bar plot
+ggplot(flight_frequency_long, aes(x = Predator.cue, y = Count, fill = Flight_Response)) +
+  geom_col(position = "dodge") +  # Grouped bars (side-by-side)
+  scale_fill_manual(
+    values = c("flight_yes" = "#344E41", "flight_no" = "#A3B18A"),  # Dark Green & Light Green
+    labels = c("flight_yes" = "Flight", "flight_no" = "No flight")  # Custom legend labels
+  ) +
+  labs(title = "Flight Response by Predator Cue",
+       x = "Predator Cue",
+       y = "Count of Flight Responses",
+       fill = "Flight Response") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels for readability
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+#retrying that but with confidence intervals
+
+# Compute flight response data (wide format)
+flight_frequency_pred <- Baboon_behaviour_data %>%
+  group_by(Predator.cue, file_name) %>%
+  summarise(flight_present = max(flight_present), .groups = "drop") %>%  
+  group_by(Predator.cue) %>%
+  summarise(
+    flight_yes = sum(flight_present == 1),  
+    flight_no = sum(flight_present == 0),   
+    n = flight_yes + flight_no,  
+    proportion_flight = flight_yes / n,  
+    proportion_no_flight = flight_no / n,  
+    
+    # Standard errors
+    se_flight = sqrt((proportion_flight * (1 - proportion_flight)) / n),
+    se_no_flight = sqrt((proportion_no_flight * (1 - proportion_no_flight)) / n),
+    
+    # 95% Confidence Intervals
+    lower_ci_flight = proportion_flight - 1.96 * se_flight,
+    upper_ci_flight = proportion_flight + 1.96 * se_flight,
+    
+    lower_ci_no_flight = proportion_no_flight - 1.96 * se_no_flight,
+    upper_ci_no_flight = proportion_no_flight + 1.96 * se_no_flight
+  )
+
+# Convert to long format and exclude No_sound
+flight_frequency_long <- flight_frequency_pred %>%
+  filter(Predator.cue != "No_sound") %>%
+  mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control"))) %>%
+  pivot_longer(
+    cols = c(flight_yes, flight_no),  # Convert these columns to long format
+    names_to = "Flight_Response",  # New column name
+    values_to = "Count"  # Store counts in this column
+  ) %>%
+  mutate(
+    proportion = ifelse(Flight_Response == "flight_yes", proportion_flight, proportion_no_flight),
+    se = ifelse(Flight_Response == "flight_yes", se_flight, se_no_flight),
+    lower_ci = ifelse(Flight_Response == "flight_yes", lower_ci_flight, lower_ci_no_flight),
+    upper_ci = ifelse(Flight_Response == "flight_yes", upper_ci_flight, upper_ci_no_flight)
+  ) %>%
+  select(Predator.cue, Flight_Response, Count, proportion, se, lower_ci, upper_ci)  # Keep only necessary columns
+
+#graph
+ggplot(flight_frequency_long, aes(x = Predator.cue, y = Count, fill = Flight_Response)) +
+  geom_col(position = position_dodge(width = 0.9)) +  # Grouped bars (side-by-side)
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), 
+                position = position_dodge(width = 0.9), 
+                width = 0.2, color = "black") +  # Black error bars
+  scale_fill_manual(
+    values = c("flight_yes" = "#344E41", "flight_no" = "#A3B18A"),  
+    labels = c("flight_yes" = "Flight", "flight_no" = "No flight")  
+  ) +
+  labs(title = "Flight Response by Predator Cue",
+       x = "Predator Cue",
+       y = "Count of Flight Responses",
+       fill = "Flight Response") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+
+
 
 #HABITAT TYPE ANALYSIS
 #create new column with habitat type
@@ -342,6 +436,32 @@ ggplot(flight_frequency_habitat, aes(x = Habitat, y = proportion_flight, fill = 
     axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
   )
 
+#grouped bar graph for frequency of flight by habitat type
+
+# Reshape data to long format for ggplot
+flight_frequency_long_habitat <- flight_frequency_habitat %>%
+  select(Habitat, flight_yes, flight_no) %>%
+  pivot_longer(cols = c(flight_yes, flight_no), 
+               names_to = "Flight_Response", 
+               values_to = "Count") 
+
+# Create grouped bar plot
+ggplot(flight_frequency_long_habitat, aes(x = Habitat, y = Count, fill = Flight_Response)) +
+  geom_col(position = "dodge") +  # Grouped bars (side-by-side)
+  scale_fill_manual(
+    values = c("flight_yes" = "#344E41", "flight_no" = "#A3B18A"),  # Dark Green & Light Green
+    labels = c("flight_yes" = "Flight", "flight_no" = "No flight")  # Custom legend labels
+  ) +
+  labs(title = "Flight Response by Habitat Type",
+       x = "Habitat Type",
+       y = "Count of Flight Responses",
+       fill = "Flight Response") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels for readability
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+
 
 #PREY IDENTITY ANALYSIS - AGE/SEX
 
@@ -376,7 +496,6 @@ ggplot(Baboon_vigilance_age_sex, aes(x = Age_sex_Category, y = mean_proportion_v
         panel.grid = element_blank(),
         legend.position = "none") 
 
-
 #PREY IDENTITY FLIGHT
 #create column for age and sex class in flight data
 Baboon_behaviour_data <- Baboon_behaviour_data %>%
@@ -386,7 +505,6 @@ Baboon_behaviour_data <- Baboon_behaviour_data %>%
     Focal.individual.sex == "M" & Focal.individual.age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   ))
-
 
 View(Baboon_flight_age_sex)
 #Calculate mean latency to flight by age_sex_class
@@ -426,7 +544,7 @@ flight_frequency_age_sex <- Baboon_behaviour_data %>%
     upper_ci = proportion_flight + 1.96 * se   # Upper bound of 95% CI
   )
 
-#bar graph for frequency of flight by habitat type
+#bar graph for frequency of flight by age_sex_Category
 ggplot(flight_frequency_age_sex, aes(x = Age_sex_Category, y = proportion_flight, fill = Age_sex_Category)) +
   geom_bar(stat = "identity", position = "dodge") +  # Bar plot
   geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), width = 0.2, color = "black") +  # Add error bars
@@ -442,4 +560,29 @@ ggplot(flight_frequency_age_sex, aes(x = Age_sex_Category, y = proportion_flight
     panel.grid = element_blank(),  # Removes all grid lines
     axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
   )
+
+#grouped bar graph for frequency of flight by age_sex_category
+
+# Reshape data to long format for ggplot
+flight_frequency_long_age_sex <- flight_frequency_age_sex %>%
+  select(Age_sex_Category, flight_yes, flight_no) %>%
+  pivot_longer(cols = c(flight_yes, flight_no), 
+               names_to = "Flight_Response", 
+               values_to = "Count") 
+
+# Create grouped bar plot
+ggplot(flight_frequency_long_age_sex, aes(x = Age_sex_Category, y = Count, fill = Flight_Response)) +
+  geom_col(position = "dodge") +  # Grouped bars (side-by-side)
+  scale_fill_manual(
+    values = c("flight_yes" = "#344E41", "flight_no" = "#A3B18A"),  # Dark Green & Light Green
+    labels = c("flight_yes" = "Flight", "flight_no" = "No flight")  # Custom legend labels
+  ) +
+  labs(
+       x = "Age and Sex Class",
+       y = "Count of Flight Responses",
+       fill = "Flight Response") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels for readability
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 
