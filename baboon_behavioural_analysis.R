@@ -1,4 +1,4 @@
-#Behavioural analysis 
+#Behavioural analysis for 2021 data
 
 #load packages
 install.packages("paletteer")
@@ -13,9 +13,9 @@ library(tidyverse)
 site_counts <- Baboon_behaviour_data %>%
   group_by(Camera.trap.site) %>%
   summarise(unique_files = n_distinct(file_name), .groups = "drop")
-View(site_counts)
-#DATAFRAME FOR VIGILANCE ANALYSIS
 
+#DATAFRAME FOR BEHAVIOUR ANALYSIS
+View(Final_2021)
 #create column by grouping videos by file_name and then labeling them with 0 if no flight present and 1 if flight present
 Baboon_behaviour_data <- Final_2021 %>%
   group_by(file_name) %>% 
@@ -54,6 +54,27 @@ Baboon_behaviour_data <- Baboon_behaviour_data %>%
   ) %>%
   ungroup() 
 
+#calculate latency to flee - NEED TO DOUBLE CHECK THIS FORMULA for order of frames 
+Baboon_behaviour_data <- Baboon_behaviour_data %>%
+  group_by(file_name) %>%
+  mutate(
+    first_row = first(row_number()),  # Get the first row number of each video
+    rows_until_flight = if_else(
+      flight_present == 1 & Behaviour == "Flight" & row_number() == min(which(Behaviour == "Flight")), 
+      row_number() - first_row, 
+      NA_integer_
+    )
+  ) %>%
+  ungroup() %>%
+  group_by(file_name) %>%
+  mutate(rows_until_flight = if_else(flight_present == 1, min(rows_until_flight, na.rm = TRUE), NA_integer_)) %>%
+  ungroup()
+
+View(Baboon_behaviour_data)
+#convert frames until seconds = latency by dividing by 30 bc 1s = 30 frames
+Baboon_behaviour_data <- Baboon_behaviour_data %>%
+  mutate(latency_to_flee_s = rows_until_flight / 30)
+
 #DATAFRAME FOR FLIGHT ANALYSIS
 
 #Make dataframe with just videos where flight is present
@@ -62,7 +83,7 @@ Baboon_flight_data <- Baboon_behaviour_data %>%
 View(Baboon_flight_data)
 
 #Calculate how many frames until flight - INCORRECT
-#frames are actually ordered from last to first 
+#frames are actually ordered from last to first - but not for all vids?? 
 Baboon_flight_data <- Baboon_flight_data %>%
   group_by(file_name) %>%
   mutate(
@@ -75,8 +96,6 @@ Baboon_flight_data <- Baboon_flight_data %>%
   mutate(rows_until_flight = min(rows_until_flight, na.rm = TRUE)) %>%
   ungroup()
 
-
-#Calculate how many
 
 #convert frames until seconds = latency by dividing by 30 bc 1s = 30 frames
 Baboon_flight_data <- Baboon_flight_data %>%
@@ -123,10 +142,12 @@ ggplot(Baboon_vigilance_predatorcue, aes(x = Predator.cue, y = mean_proportion_v
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.grid = element_blank()) 
 
-#group by file_name
+#group by file_name and exclude those that fled immediately
 Baboon_vigilance_predatorcue2 <- Baboon_behaviour_data %>%
+  filter(latency_to_flee_s != 0) %>%  # Exclude files with latency_to_flee_s = 0
   group_by(Predator.cue, file_name) %>%
-  summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE))
+  summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE), .groups = "drop")
+
 
 #correct NaN values to 0
 Baboon_vigilance_predatorcue2$mean_proportion_vigilant[is.nan(Baboon_vigilance_predatorcue2$mean_proportion_vigilant)] <- 0
