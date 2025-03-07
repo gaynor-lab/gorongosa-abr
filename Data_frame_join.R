@@ -19,12 +19,12 @@ View(Baboon_2021_data_MOT)
 colnames(Baboon_2021_data_MOT) <- c("frame_id","track_id", "x", "y","w","h","not_ignored","class_id","visibility")
 
 #Second watch data
-B_21_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/gorongosa-abr/Baboon_second_watch_FINAL - 2021.csv")
+B_21_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/gorongosa-abr/Baboon_second_watch_2021_fixed.csv")
 
 #make file name column
 B_21_second<- B_21_second %>%
-  mutate(file_name = paste(Year, Camera.trap.site, video_name, sep = "_"))
-
+  mutate(file_name = paste(Year, Camera.trap.site,video_name, sep = "_"))
+View(B_21_second)
 #Convert XML to dataframe
 xml_file <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_cvat for video 1.1/annotations.xml")
 
@@ -142,15 +142,6 @@ num_unique_values_annotations
 #570 
 
 View(Final_2021)
-
-
-unique_values <- unique(Final_2021$`Task ID`)
-num_unique_values <- length(unique_values)
-num_unique_values
-
-unique_values_annotations <- unique(frame_df2$task_id)
-num_unique_values_annotations <- length(unique_values_annotations)
-num_unique_values_annotations
 
 
 
