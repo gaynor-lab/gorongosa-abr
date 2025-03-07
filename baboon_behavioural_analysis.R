@@ -23,11 +23,6 @@ Baboon_behaviour_data <- Final_2021 %>%
   ungroup()
 View(Baboon_behaviour_data)
 
-#there is still 6 missing videos that i cannot find 
-na_rows <- Baboon_behaviour_data %>%
-  filter(is.na(Camera.trap.site))
-View(na_rows)
-
 #Count how many file_name have flight and how many do not
 Baboon_behaviour_data %>%
   group_by(flight_present) %>%
@@ -144,13 +139,12 @@ ggplot(Baboon_vigilance_predatorcue, aes(x = Predator.cue, y = mean_proportion_v
 
 #group by file_name and exclude those that fled immediately
 Baboon_vigilance_predatorcue2 <- Baboon_behaviour_data %>%
-  filter(latency_to_flee_s != 0) %>%  # Exclude files with latency_to_flee_s = 0
+  filter(is.na(latency_to_flee_s) | latency_to_flee_s != 0) %>% # Exclude files with latency_to_flee_s = 0
   group_by(Predator.cue, file_name) %>%
-  summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE), .groups = "drop")
+  summarise(proportion_vigilant = first(na.omit(proportion_vigilant)), .groups = "drop") #because NA values are videos where the baboon was occluded the entire time
 
-
-#correct NaN values to 0
-Baboon_vigilance_predatorcue2$mean_proportion_vigilant[is.nan(Baboon_vigilance_predatorcue2$mean_proportion_vigilant)] <- 0
+View(Baboon_behaviour_data)
+View(Baboon_vigilance_predatorcue2)
 
 #filter data to remove No_sound group and reorder predator cues
 Baboon_vigilance_predatorcue2 <- Baboon_vigilance_predatorcue2 %>%
@@ -158,12 +152,12 @@ Baboon_vigilance_predatorcue2 <- Baboon_vigilance_predatorcue2 %>%
   mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control")))  # Adjust Cue names as needed
 View(Baboon_vigilance_predatorcue2)
 #Strip plot for proportion of vigilance by predator cue
-ggplot(Baboon_vigilance_predatorcue2, aes(x = Predator.cue, y = mean_proportion_vigilant, fill = Predator.cue, color = Predator.cue)) +
+ggplot(Baboon_vigilance_predatorcue2, aes(x = Predator.cue, y = proportion_vigilant, fill = Predator.cue, color = Predator.cue)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for box fill
-  labs(title = "Proportion vigilant by Predator Cue",
+  labs(
        x = "Predator Cue",
        y = "Proportion vigilant") +
   theme_minimal() +
@@ -215,8 +209,7 @@ ggplot(Baboon_flight_data_predatorcue, aes(x = Predator.cue, y = mean_latency_to
 Baboon_flight_data_grouped <- Baboon_flight_data %>%
   group_by(file_name, Predator.cue) %>%
   summarise(
-    mean_latency_to_flee = mean(latency_to_flee_s, na.rm = TRUE),
-    Camera.trap.site = first(Camera.trap.site),  # Retain Camera.trap.site
+    latency_to_flee = first(na.omit(latency_to_flee_s)),  # Get first non-NA value
     .groups = "drop"
   ) %>%
   filter(file_name != "2021_F07_07220010_Baboon.AVI")  #excluded outlier bc it was 27 seconds
@@ -227,12 +220,12 @@ Baboon_flight_data_grouped <- Baboon_flight_data_grouped %>%
   mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control")))  # Adjust Cue names as needed
 
 # Create boxplot + jitter plot (strip plot)
-ggplot(Baboon_flight_data_grouped, aes(x = Predator.cue, y = mean_latency_to_flee, fill = Predator.cue, color = Predator.cue)) +
+ggplot(Baboon_flight_data_grouped, aes(x = Predator.cue, y = latency_to_flee, fill = Predator.cue, color = Predator.cue)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for box fill
-  labs(title = "Latency to Flee by Predator Cue",
+  labs(
        x = "Predator Cue",
        y = "Latency to Flee (seconds)") +
   theme_minimal() +
@@ -296,7 +289,7 @@ ggplot(flight_frequency_long, aes(x = Predator.cue, y = Count, fill = Flight_Res
     values = c("flight_yes" = "#344E41", "flight_no" = "#A3B18A"),  # Dark Green & Light Green
     labels = c("flight_yes" = "Flight", "flight_no" = "No flight")  # Custom legend labels
   ) +
-  labs(title = "Flight Response by Predator Cue",
+  labs(
        x = "Predator Cue",
        y = "Count of Flight Responses",
        fill = "Flight Response") +
@@ -381,18 +374,19 @@ Baboon_behaviour_data <- Baboon_behaviour_data %>%
 #HABITAT TYPE VIGILANCE
 #group by habitat type
 Baboon_vigilance_habitat <- Baboon_behaviour_data %>%
-  filter(!is.na(Habitat)) %>%  # Exclude NA values
+  filter(is.na(latency_to_flee_s) | latency_to_flee_s != 0) %>% # Exclude files with latency_to_flee_s = 0
   group_by(Habitat, file_name, Camera.trap.site) %>%
-  summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE), .groups = "drop")
+  summarise(proportion_vigilant = first(na.omit(proportion_vigilant)), .groups = "drop") #because NA values are videos where the baboon was occluded the entire time
 View(Baboon_vigilance_habitat)
 
+
 #strip plot for proportion vigilance by habitat type
-ggplot(Baboon_vigilance_habitat, aes(x = Habitat, y = mean_proportion_vigilant, fill = Habitat, color = Habitat)) +
+ggplot(Baboon_vigilance_habitat, aes(x = Habitat, y = proportion_vigilant, fill = Habitat, color = Habitat)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for box fill
-  labs(title = "Proportion of time vigilant by habitat type",
+  labs(
        x = "Habitat type",
        y = "Proportion of time vigilant") +
   theme_minimal() +
@@ -404,7 +398,6 @@ ggplot(Baboon_vigilance_habitat, aes(x = Habitat, y = mean_proportion_vigilant, 
 #HABITAT TYPE FLIGHT
 #Calculate mean latency to flight by habitat type
 Baboon_flight_data_habitat <- Baboon_flight_data %>%
-  filter(!is.na(Habitat)) %>% 
   group_by(Habitat, file_name) %>%
   summarize(mean_latency_to_flee = mean(latency_to_flee_s, na.rm = TRUE), .groups = "drop") %>%  # Keep pipeline open
   filter(file_name != "2021_F07_07220010_Baboon.AVI") 
@@ -415,7 +408,7 @@ ggplot(Baboon_flight_data_habitat, aes(x = Habitat, y = mean_latency_to_flee, fi
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for box fill
-  labs(title = "Latency to Flee by habitat type",
+  labs(
        x = "Habitat type",
        y = "Latency to Flee (seconds)") +
   theme_minimal() +
@@ -473,7 +466,7 @@ ggplot(flight_frequency_long_habitat, aes(x = Habitat, y = Count, fill = Flight_
     values = c("flight_yes" = "#344E41", "flight_no" = "#A3B18A"),  # Dark Green & Light Green
     labels = c("flight_yes" = "Flight", "flight_no" = "No flight")  # Custom legend labels
   ) +
-  labs(title = "Flight Response by Habitat Type",
+  labs(
        x = "Habitat Type",
        y = "Count of Flight Responses",
        fill = "Flight Response") +
@@ -489,10 +482,12 @@ ggplot(flight_frequency_long_habitat, aes(x = Habitat, y = Count, fill = Flight_
 #PREY IDENTITY VIGILANCE
 #group by age and sex class
 Baboon_vigilance_age_sex <- Baboon_behaviour_data %>%
+  filter(is.na(latency_to_flee_s) | latency_to_flee_s != 0) %>% # Exclude files with latency_to_flee_s = 0
   filter(!is.na(Focal.individual.sex)) %>% 
-  group_by(file_name, Focal.individual.sex, Focal.individual.age) %>%
-  summarise(mean_proportion_vigilant = mean(proportion_vigilant, na.rm = TRUE))
+  group_by(file_name, Focal.individual.sex, Focal.individual.age, Number.of.individuals, Presence.of.offspring) %>%
+  summarise(proportion_vigilant = first(na.omit(proportion_vigilant)), .groups = "drop") #because NA values are videos where the baboon was occluded the entire time
 View(Baboon_vigilance_age_sex)
+View(Baboon_behaviour_data)
 
 #make new column for age_sex_category
 Baboon_vigilance_age_sex <- Baboon_vigilance_age_sex %>%
@@ -504,12 +499,12 @@ Baboon_vigilance_age_sex <- Baboon_vigilance_age_sex %>%
   ))
 
 #strip plot for proportion vigilance by age_sex_category
-ggplot(Baboon_vigilance_age_sex, aes(x = Age_sex_Category, y = mean_proportion_vigilant, fill = Age_sex_Category, color = Age_sex_Category)) +
+ggplot(Baboon_vigilance_age_sex, aes(x = Age_sex_Category, y = proportion_vigilant, fill = Age_sex_Category, color = Age_sex_Category)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for box fill
-  labs(title = "Proportion of time vigilant by Baboon age and sex class",
+  labs(
        x = "Baboon age and sex class",
        y = "Proportion of time vigilant") +
   theme_minimal() +
@@ -540,7 +535,7 @@ ggplot(Baboon_flight_age_sex, aes(x = Age_sex_Category, y = mean_latency_to_flee
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for box fill
-  labs(title = "Latency to Flee by Baboon age and sex class",
+  labs(
        x = "Baboon age and sex class",
        y = "Latency to Flee (seconds)") +
   theme_minimal() +
