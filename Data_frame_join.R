@@ -1,4 +1,4 @@
-#Joining dataframes 
+#Joining dataframes (CVAT annotations and second watch) 
 
 #load packages
 install.packages("xml2")
@@ -8,27 +8,21 @@ library(ggplot2)
 library(stringr)
 library(tidyverse)
 
-#CVAT1.1 format - USE THIS FORMAT
-Baboon_2021_vid_CVAT <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_cvat for video 1.1/annotations.xml")
-
-#MOT1.1 format 
-#Read the data in 
-Baboon_2021_data_MOT <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_mot 1.1/gt/gt.txt", header = FALSE)
-View(Baboon_2021_data_MOT)
-#add column names from CVAT export data site
-colnames(Baboon_2021_data_MOT) <- c("frame_id","track_id", "x", "y","w","h","not_ignored","class_id","visibility")
-
-#Second watch data
+#Import second watch metadata in CSV format 
 B_21_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/gorongosa-abr/Baboon_second_watch_2021_fixed.csv")
 
-#make file name column
+#make file name column in second watch data to join with file_name from CVAT annotations
 B_21_second<- B_21_second %>%
   mutate(file_name = paste(Year, Camera.trap.site,video_name, sep = "_"))
 View(B_21_second)
+
+#Import CVAT annotations in CVAT1.1 format to XML
+Baboon_2021_vid_CVAT <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_cvat for video 1.1/annotations.xml")
+
 #Convert XML to dataframe
 xml_file <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_cvat for video 1.1/annotations.xml")
 
-# Extract all <record> nodes
+# Extract all tasks (task = 1 video)
 tasks <- xml_find_all(xml_file, ".//task")
 
 # Create task and video ID
@@ -128,20 +122,6 @@ Final_2021 <- Final_2021 %>%
 #Rename NA predator cues to No_sound
 Final_2021 <- Final_2021 %>%
   mutate(Predator.cue = if_else(is.na(Predator.cue), "No_sound", Predator.cue))
-
-#checking if all videos were transferred in join
-unique_values <- unique(Final_2021$file_name)
-num_unique_values <- length(unique_values)
-num_unique_values
-# 570 
-
-#checking number in annotations.xml dataframe
-unique_values_annotations <- unique(frame_df2$file_name)
-num_unique_values_annotations <- length(unique_values_annotations)
-num_unique_values_annotations
-#570 
-
-View(Final_2021)
 
 
 
