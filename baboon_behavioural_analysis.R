@@ -40,7 +40,14 @@ Baboon_vigilance_data <- Baboon_vigilance_data %>%
   ) %>%
   ungroup()
 
-View(Baboon_vigilance_data)
+#add column grouping predator cues by hunting mode
+Baboon_vigilance_data <- Baboon_vigilance_data %>%
+  mutate(Hunting_mode = case_when(
+      Predator.cue %in% c("Lion", "Cheetah", "Leopard") ~ "Ambush",
+      Predator.cue %in% c("Hyena", "Wild_dog") ~ "Coursing",
+      Predator.cue %in% c("Control") ~ "Control",
+      
+  ))
 
 #Dataframe for proportion vigilance model
 Baboon_vigilance_stats <- Baboon_vigilance_data %>%
@@ -106,6 +113,15 @@ Baboon_flight_data <- Baboon_flight_data %>%
 Baboon_flight_data <- Baboon_flight_data %>%
   mutate(latency_to_flee_s = rows_until_flight / 30)
 
+#add column grouping predator cues by hunting mode
+Baboon_flight_data <- Baboon_flight_data %>%
+  mutate(Hunting_mode = case_when(
+    Predator.cue %in% c("Lion", "Cheetah", "Leopard") ~ "Ambush",
+    Predator.cue %in% c("Hyena", "Wild_dog") ~ "Coursing",
+    Predator.cue %in% c("Control") ~ "Control",
+    
+  ))
+
 #Dataframe for latency to flee model
 Baboon_flight_stats <- Baboon_flight_data %>%
   mutate(Habitat = case_when(
@@ -145,6 +161,15 @@ Baboon_frequency_data <- Baboon_frequency_data %>%
   mutate(flight_present = if_else(any(str_detect(Behaviour, "Flight")), 1, 0)) %>%
   ungroup()
 
+#add column grouping predator cues by hunting mode
+Baboon_frequency_data <- Baboon_frequency_data %>%
+  mutate(Hunting_mode = case_when(
+    Predator.cue %in% c("Lion", "Cheetah", "Leopard") ~ "Ambush",
+    Predator.cue %in% c("Hyena", "Wild_dog") ~ "Coursing",
+    Predator.cue %in% c("Control") ~ "Control",
+    
+  ))
+
 #Dataframe for flight frequency model
 Baboon_frequency_stats <- Baboon_frequency_data %>%
   mutate(Habitat = case_when(
@@ -175,7 +200,7 @@ Baboon_frequency_stats <- Baboon_frequency_data %>%
 
 #group by file_name and exclude those that fled immediately
 Baboon_vigilance_predatorcue <- Baboon_vigilance_data %>%
-  group_by(Predator.cue, file_name) %>%
+  group_by(Predator.cue, file_name, Hunting_mode) %>%
   summarise(proportion_vigilant = first(na.omit(proportion_vigilant)), .groups = "drop") #because NA values are videos where the baboon was occluded the entire time
 
 #Reorder predator cues for graphing
@@ -183,21 +208,11 @@ Baboon_vigilance_predatorcue <- Baboon_vigilance_predatorcue %>%
   mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control")))  # Adjust Cue names as needed
 
 #Strip plot for proportion of vigilance by predator cue
-ggplot(Baboon_vigilance_predatorcue, aes(x = Predator.cue, y = proportion_vigilant, fill = Predator.cue, color = Predator.cue)) +
+ggplot(Baboon_vigilance_predatorcue, aes(x = Predator.cue, y = proportion_vigilant, fill = Hunting_mode, color = Hunting_mode)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
-  scale_fill_manual(values = c("Lion" = paletteer_d("nationalparkcolors::Acadia")[3], 
-                               "Cheetah" = paletteer_d("nationalparkcolors::Acadia")[3], 
-                               "Leopard" = paletteer_d("nationalparkcolors::Acadia")[3],
-                               "Wild_dog" = paletteer_d("nationalparkcolors::Acadia")[5], 
-                               "Hyena" = paletteer_d("nationalparkcolors::Acadia")[5],
-                               "Control" = paletteer_d("nationalparkcolors::Acadia")[6])) +  # Assign colors from the palette
-  scale_color_manual(values = c("Lion" = paletteer_d("nationalparkcolors::Acadia")[3], 
-                                "Cheetah" = paletteer_d("nationalparkcolors::Acadia")[3], 
-                                "Leopard" = paletteer_d("nationalparkcolors::Acadia")[3],
-                                "Wild_dog" = paletteer_d("nationalparkcolors::Acadia")[5], 
-                                "Hyena" = paletteer_d("nationalparkcolors::Acadia")[5],
-                                "Control" = paletteer_d("nationalparkcolors::Acadia")[6])) +  # Assign colors for points
+  scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
+  scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for box fill
   labs(
     x = "Predator Cue",
     y = "Proportion Vigilant") +
@@ -211,7 +226,7 @@ ggplot(Baboon_vigilance_predatorcue, aes(x = Predator.cue, y = proportion_vigila
 #group by file_name and reorder by predator.cue
 Baboon_flight_predatorcue <- Baboon_flight_data %>%
   filter(file_name != "2021_F07_07220010_Baboon.AVI") %>%  # Exclude outlier
-  group_by(file_name, Predator.cue) %>%
+  group_by(file_name, Predator.cue, Hunting_mode) %>%
   summarise(
     latency_to_flee = first(na.omit(latency_to_flee_s)),  # Get first non-NA value
     .groups = "drop"
@@ -219,7 +234,7 @@ Baboon_flight_predatorcue <- Baboon_flight_data %>%
   mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control")))  # Adjust Cue names as needed
 
 #Strip plot for latency to flee by predator cue
-ggplot(Baboon_flight_predatorcue, aes(x = Predator.cue, y = latency_to_flee, fill = Predator.cue, color = Predator.cue)) +
+ggplot(Baboon_flight_predatorcue, aes(x = Predator.cue, y = latency_to_flee, fill = Hunting_mode, color = Hunting_mode)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
@@ -230,14 +245,14 @@ ggplot(Baboon_flight_predatorcue, aes(x = Predator.cue, y = latency_to_flee, fil
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.grid = element_blank(),
-        legend.position = "none")  
+        legend.position = "right")  
 
 #Log transform latency_to_flee because right skewed and non-normal
 Baboon_flight_predatorcue <- Baboon_flight_predatorcue %>%
   mutate(log_latency = log(latency_to_flee + 1))
 
 #Strip plot for log latency to flee by predator cue
-ggplot(Baboon_flight_predatorcue, aes(x = Predator.cue, y = log_latency, fill = Predator.cue, color = Predator.cue)) +
+ggplot(Baboon_flight_predatorcue, aes(x = Predator.cue, y = log_latency, fill = Hunting_mode, color = Hunting_mode)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
@@ -248,28 +263,28 @@ ggplot(Baboon_flight_predatorcue, aes(x = Predator.cue, y = log_latency, fill = 
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.grid = element_blank(),
-        legend.position = "none")  
+        legend.position = "right")  
 
 #PREDATOR IDENTITY FLIGHT FREQUENCY
 
 #group flight data by predator cue and file_name
 flight_frequency_predatorcue <- Baboon_frequency_data %>%
-  group_by(Predator.cue, file_name) %>%  
+  group_by(Predator.cue, file_name, Hunting_mode) %>%  
   summarise(flight_present = max(flight_present), .groups = "drop") %>%  # Check if flight occurred per video
-  group_by(Predator.cue, flight_present) %>%
+  group_by(Predator.cue, flight_present, Hunting_mode) %>%
   summarise(Count = n(), .groups = "drop") %>%  # Count occurrences of flight/no flight
   mutate(Predator.cue = factor(Predator.cue, levels = c("Leopard", "Cheetah", "Lion","Wild_dog","Hyena", "Control"))) %>%  
   mutate(flight_present = factor(flight_present, levels = c(0, 1), labels = c("No Flight", "Flight")))
 
 #Stacked bar graph for frequency of flight by predator cue
-ggplot(flight_frequency_predatorcue, aes(x = Predator.cue, y = Count, fill = Predator.cue, alpha = flight_present)) +
+ggplot(flight_frequency_predatorcue, aes(x = Predator.cue, y = Count, fill = Hunting_mode, alpha = flight_present)) +
   geom_bar(stat = "identity", position = "fill") +  # Proportional stacking
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Apply Acadia colors to Predator.cue
   scale_alpha_manual(values = c("No Flight" = 0.3, "Flight" = 1)) +  # Adjust transparency
   labs(x = "Predator Cue", y = "Relative frequency of flight", fill = "Predator Cue", alpha = "Flight Response") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-  legend.position = "none", 
+  legend.position = "right", 
   panel.grid = element_blank())
 
 #HABITAT TYPE ANALYSIS
