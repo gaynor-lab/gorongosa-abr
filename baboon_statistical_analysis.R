@@ -2,7 +2,10 @@
 
 #load packages
 install.packages("betareg")
+install.packages("MuMIn")
+library(lme4)
 library(betareg)
+library(MuMIn)
 
 #PREDATOR IDENTITY
 
@@ -142,10 +145,13 @@ Baboon_behaviour_data_2 <- Baboon_behaviour_data %>%
 Baboon_behaviour_data_2$Predator.cue <- as.factor(Baboon_behaviour_data_2$Predator.cue)
 Baboon_behaviour_data_2$Predator.cue <- relevel(Baboon_behaviour_data_2$Predator.cue, ref = "Control")  # Control as reference
 
-vigilance_full_glm <- glm(proportion_vigilant ~ Habitat + Age_sex_Category + Predator.cue, 
+vigilance_full_glm <- glmer(proportion_vigilant ~ Habitat + Age_sex_Category + Predator.cue, 
                           data = Baboon_behaviour_data_2, 
                           family = binomial(link = "logit"))
 summary(vigilance_full_glm)
+R.squaredGLMM(vigilance_full_glm)
+
+#AIC 
 
 
 
