@@ -1,7 +1,6 @@
 #Baboon multi-model
 
 #load packages
-install.packages("glmmTMB")
 library(glmmTMB)
 library(dplyr)
 library(MuMIn)
@@ -26,22 +25,16 @@ Vigilance_global_model_beta <- glmmTMB(proportion_vigilant_beta ~ Predator.cue +
                   family = beta_family(),
                   na.action = na.fail) 
 
-#Global GLMM using gaussian distribution
-Vigilance_global_model_gaussian <- glmmTMB(proportion_vigilant ~ Predator.cue + Habitat + age_sex_class + Number.of.individuals + Presence_of_offspring + (1|Camera.trap.site),
-                                  data = Baboon_vigilance_stats,
-                                  family = gaussian(),
-                                  na.action = na.fail) 
-
 #generate model set
 Vigilance_models <- dredge(Vigilance_global_model_beta)
-View(Vigilance_models)
+
 # Model averaging based on AIC
 Vigilance_model_avg <- model.avg(Vigilance_models)
 
 # Get model-averaged results
 summary(Vigilance_model_avg)
 
-#LATENCY TO FLEE MODEL
+# LATENCY TO FLEE MODEL
 
 #set control as reference level for Predator.cue
 Baboon_flight_stats <- Baboon_flight_stats %>%

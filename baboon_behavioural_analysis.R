@@ -122,7 +122,6 @@ Baboon_flight_data <- Baboon_flight_data %>%
     
   ))
 
-View(Baboon_flight_data)
 #Dataframe for latency to flee model
 Baboon_flight_stats <- Baboon_flight_data %>%
   mutate(Habitat = case_when(
@@ -147,7 +146,7 @@ Baboon_flight_stats <- Baboon_flight_data %>%
       ) %>%
   drop_na(latency_to_flee, Predator.cue, Habitat, age_sex_class, Number.of.individuals, Presence_of_offspring)%>% #need to drop one video where age_sex_class is NA for analysis
   mutate(log_latency_to_flee = log(latency_to_flee + 1)) 
-View(Baboon_flight_stats)
+
 #DATAFRAME FOR FLIGHT FREQUENCY
 
 #filter videos that have No_sound or sound.quality = poor or a sound delay as they will not be included in analysis
