@@ -1,4 +1,4 @@
-#Baboon stepwise modelling 
+#Baboon stepwise modelling for interaction effects
 
 #PROPORTION OF TIME SPENT VIGILANT
 Vigilance_full_model <- glmmTMB(proportion_vigilant_beta ~ Predator.cue + Habitat + age_sex_class + Number.of.individuals + Presence_of_offspring + (1|Camera.trap.site),
