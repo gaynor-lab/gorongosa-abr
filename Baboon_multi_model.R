@@ -48,7 +48,6 @@ Latency_global_model <- glmmTMB(log_latency_to_flee ~ Predator.cue + Habitat + a
                   family = gaussian(),
                   na.action = na.fail)
                   
-
 #generate model set
 Latency_models <- dredge(Latency_global_model)
 
