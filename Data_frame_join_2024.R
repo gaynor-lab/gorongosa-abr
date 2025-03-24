@@ -8,7 +8,7 @@ library(stringr)
 library(tidyverse)
 
 #Import second watch metadata in CSV format 
-B_24_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/gorongosa-abr/Baboon_second_watch_sample_2024.csv")
+B_24_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/gorongosa-abr/gorongosa-abr/Baboon_second_watch_FINAL_2024.csv")
 
 #make file name column in second watch data to join with file_name from CVAT annotations
 B_24_second<- B_24_second %>%
