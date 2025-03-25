@@ -7,7 +7,7 @@ year,site,video_name,predator_cue,predator_file,sound_quality,sound_delay_s,sex,
 2024,D05,07230032_Baboon.AVI,Lion,20,Good,1.5,M,A,1,0,None,Day,30,post
 2024,D05,07280071_Baboon.AVI,WD,4,Good,1.5,F,A,1,0,None,Day,30,post
 2024,D05,07280072_Baboon.AVI,Lion,23,Good,1.5,J,J,1,0,None,Day,30,post
-2024,D05,07290077-Baboon.AVI,None,None,None,NA,J,J,1,0,None,Day,30,post
+2024,D05,07290077_Baboon.AVI,None,None,None,NA,J,J,1,0,None,Day,30,post
 2024,D05,07290080_Baboon.AVI,Leopard,28,Good,1.5,M,A,1,0,None,Day,30,post
 2024,D05,07290081_Baboon.AVI,Cheetah,10,Good,1.5,J,J,1,0,None,Day,30,post
 2024,D05,07290082_Baboon.AVI,Hyena,18,Good,1.5,F,A,1,0,None,Day,30,post
@@ -34,7 +34,7 @@ year,site,video_name,predator_cue,predator_file,sound_quality,sound_delay_s,sex,
 2024,E08,07290103_Baboon.AVI,WD,6,Poor,1.5,M,A,1,0,None,Day,30,post
 2024,E08,07280075_Baboon.AVI,Cheetah,10,Good,1.5,M,A,1,0,None,Day,30,post
 2024,E08,07260058_Baboon.AVI,Cheetah,10,Good,1.5,F,A,1,0,None,Day,30,post
-2024,E08,8180139_Baboon.AVI,None,None,None,NA,J,J,1,0,None,Day,30,post
+2024,E08,08190139_Baboon.AVI,None,None,None,NA,J,J,1,0,None,Day,30,post
 2024,E08,08190138_Baboon.AVI,Cheetah,8,Good,1.5,F,A,2,0,None,Day,30,post
 2024,E08,08180112_Baboon.AVI,Control,37,Good,1.5,F,A,1,0,None,Day,30,post
 2024,E08,08180111_Baboon.AVI,Cheetah,7,Good,1.5,M,A,1,0,None,Day,30,post
@@ -62,7 +62,7 @@ year,site,video_name,predator_cue,predator_file,sound_quality,sound_delay_s,sex,
 2024,F01,07210041_Baboon.AVI,Lion,19,Good,1.5,F,A,1,0,None,Day,30,pre
 2024,F01,07200036_Baboon.AVI,WD,3,Good,1.5,M,A,1,0,None,Day,30,pre
 2024,F01,07170014_Baboon.AVI,WD,2,Good,1.5,F,A,1,0,None,Day,30,pre
-2024,F03,0730076_Baboon.AVI,Cheetah,7,Good,2,F,A,1,0,None,Day,30,post
+2024,F03,07300076_Baboon.AVI,Cheetah,7,Good,2,F,A,1,0,None,Day,30,post
 2024,F03,07250043_Baboon.AVI,Cheetah,7,Good,2,J,J,1,0,None,Day,30,post
 2024,F03,07250042_Baboon.AVI,Cheetah,12,Good,2,J,J,1,0,None,Day,30,post
 2024,F03,07250036_Baboon.AVI,WD,3,Good,1.5,M,A,1,0,None,Day,30,post
@@ -119,6 +119,11 @@ year,site,video_name,predator_cue,predator_file,sound_quality,sound_delay_s,sex,
 2024,G06,08050011_Baboon.AVI,Lion,19,Good,1.5,M,A,1,0,None,Day,30,post
 2024,G06,08040009_Baboon.AVI,Lion,21,Good,1.5,M,A,1,0,None,Day,30,post
 2024,G06,08040008_Baboon.AVI,Leopard ,27,Good,1.5,F,A,1,0,None,Day,30,post
+2024,G06,07240018_Baboon.AVI,WD,5,Good,1.5,M,A,1,0,None,Day,30,pre
+2024,G06,07240016_Baboon.AVI,Leopard,26,Good,1.5,J,J,1,0,None,Day,30,pre
+2024,G06,07230013_Baboon.AVI,Hyena,15,Good,1.5,F,A,1,0,None,Day,30,pre
+2024,G06,07220012_Baboon.AVI,Lion,19,Good,1.5,F,A,1,0,None,Day,30,pre
+2024,G06,07210007_Baboon.AVI,Cheetah,7,Good,1.5,M,A,1,0,None,Day,30,pre
 2024,I06,08060058_Baboon.AVI,Cheetah,12,Good,1.5,F,A,1,0,None,Day,30,post
 2024,I06,08050054_Baboon.AVI,Control,33,Good,1.5,M,A,1,0,None,Day,30,post
 2024,I06,08040053_Baboon.AVI,Control,38,Good,1.5,F,A,1,0,None,Day,30,post
@@ -362,8 +367,8 @@ year,site,video_name,predator_cue,predator_file,sound_quality,sound_delay_s,sex,
 2024,F07,07240041_Baboon.AVI,Cheetah,7,Good,1,J,J,1,0,None,Day,30,pre
 2024,F07,07240042_Baboon.AVI,Control,32,Good,1,J,J,4,0,None,Day,30,pre
 2024,F07,07250045_Baboon.AVI,Leopard,25,Good,1,F,A,1,0,None,Day,30,pre
-2024,F07,07260057_Baboon.AVI,Cheetah,12,Good,1,F,A,1,0,None,Day,30,post
-2024,F07,7260058_Baboon.AVI,WD,3,Good,1,F,A,1,0,None,Day,30,post
+2024,F07,7260057_Baboon.AVI,Cheetah,12,Good,1,F,A,1,0,None,Day,30,post
+2024,F07,07260058_Baboon.AVI,WD,3,Good,1,F,A,1,0,None,Day,30,post
 2024,F07,07280070_Baboon.AVI,Cheetah,8,Good,1,J,J,1,0,None,Day,30,post
 2024,F07,07280071_Baboon.AVI,WD,14,Good,1,F,A,3,1,None,Day,30,post
 2024,F07,07280072_Baboon.AVI,Leopard,27,Good,1,F,A,1,0,None,Day,30,post
