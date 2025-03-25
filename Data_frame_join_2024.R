@@ -15,11 +15,8 @@ B_24_second<- B_24_second %>%
   mutate(file_name = paste(year, site,video_name, sep = "_"))
 View(B_24_second)
 
-#Import CVAT annotations in CVAT1.1 format to XML
-Baboon_2024_vid_CVAT <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/gorongosa-abr/annotations_2024_sample.xml")
-
 #Convert XML to dataframe
-xml_file <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/gorongosa-abr/annotations_2024_sample.xml")
+xml_file <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/gorongosa-abr/gorongosa-abr/2024_final_annotations.xml")
 
 # Extract all tasks (task = 1 video)
 tasks <- xml_find_all(xml_file, ".//task")
@@ -31,7 +28,6 @@ task_df <- map_df(tasks, ~{
     task_name = xml_text(xml_find_first(.x, ".//name"))
   )
 })
-head(task_df)
 
 # Create annotations with task ID
 task_df <- map_df(tasks, ~{
@@ -40,7 +36,6 @@ task_df <- map_df(tasks, ~{
     task_name = xml_text(xml_find_first(.x, ".//name"))
   )
 })
-head(task_df)
 
 # Extract all <track> nodes
 tracks <- xml_find_all(xml_file, ".//track")
@@ -60,13 +55,20 @@ frame_df <- map_df(tracks, ~{
   ))
 })
 
-# View the resulting data frame
-print(frame_df)
 
 # Join with file name
 frame_df2 <- left_join(frame_df, task_df)
 colnames(frame_df2)[colnames(frame_df2) == "task_name"] <- "file_name"
-View(frame_df2)
+
+#fix typo in L11 date file names
+frame_df2 <- frame_df2 %>%
+  mutate(
+    file_name = if_else(
+      str_detect(file_name, "L11") & str_detect(file_name, "2924"),
+      str_replace(file_name, "2924", "2024"),
+      file_name
+    )
+  )
 
 # Join datasets based on filename
 Final_2024 <- frame_df2 %>%
@@ -80,7 +82,18 @@ view(Final_2024)
 colnames(Final_2024)[colnames(Final_2024) == "task_id"] <- "Task_ID"
 colnames(Final_2024)[colnames(Final_2024) == "label"] <- "Behaviour"
 
+#fix typo in L11 date file names
+Final_2024 <- Final_2024 %>%
+  mutate(
+    file_name = if_else(
+      str_detect(file_name, "L11") & str_detect(file_name, "2924"),
+      str_replace(file_name, "2924", "2024"),
+      file_name
+    )
+  )
 
+#fix typo in Walking_V
+Final_2024 <- Final_2024 %>%
+  mutate(Behaviour = ifelse(Behaviour == "Waking_V", "Walking_V", Behaviour))
 
-
-
+View(Final_2024)
