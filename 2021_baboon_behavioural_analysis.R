@@ -254,7 +254,8 @@ Baboon_flight_predatorcue <- Baboon_flight_predatorcue %>%
   mutate(log_latency = log(latency_to_flee + 1))
 
 #Strip plot for log latency to flee by predator cue
-ggplot(Baboon_flight_predatorcue, aes(x = Predator.cue, y = log_latency, fill = Hunting_mode, color = Hunting_mode)) +
+latency_predcue_plot_21 <- 
+  ggplot(Baboon_flight_predatorcue, aes(x = Predator.cue, y = log_latency, fill = Hunting_mode, color = Hunting_mode)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
@@ -279,7 +280,8 @@ flight_frequency_predatorcue <- Baboon_frequency_data %>%
   mutate(flight_present = factor(flight_present, levels = c(0, 1), labels = c("No Flight", "Flight")))
 
 #Stacked bar graph for frequency of flight by predator cue
-ggplot(flight_frequency_predatorcue, aes(x = Predator.cue, y = Count, fill = Hunting_mode, alpha = flight_present)) +
+frequency_predcue_plot_21 <-
+  ggplot(flight_frequency_predatorcue, aes(x = Predator.cue, y = Count, fill = Hunting_mode, alpha = flight_present)) +
   geom_bar(stat = "identity", position = "fill") +  # Proportional stacking
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Apply Acadia colors to Predator.cue
   scale_alpha_manual(values = c("No Flight" = 0.3, "Flight" = 1)) +  # Adjust transparency
@@ -304,7 +306,8 @@ Baboon_vigilance_habitat <- Baboon_vigilance_data %>%
   summarise(proportion_vigilant = first(na.omit(proportion_vigilant)), .groups = "drop") 
 
 #strip plot for proportion vigilance by habitat type
-ggplot(Baboon_vigilance_habitat, aes(x = Habitat, y = proportion_vigilant, fill = Habitat, color = Habitat)) +
+vigilance_habitat_plot_21 <-
+  ggplot(Baboon_vigilance_habitat, aes(x = Habitat, y = proportion_vigilant, fill = Habitat, color = Habitat)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
@@ -352,7 +355,8 @@ Baboon_flight_habitat <- Baboon_flight_habitat %>%
   mutate(log_latency = log(latency_to_flee + 1))
 
 #Strip plot for log latency to flee by predator cue
-ggplot(Baboon_flight_habitat, aes(x = Habitat, y = log_latency, fill = Habitat, color = Habitat)) +
+latency_habitat_plot_21 <-
+  ggplot(Baboon_flight_habitat, aes(x = Habitat, y = log_latency, fill = Habitat, color = Habitat)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
@@ -383,7 +387,8 @@ flight_frequency_habitat <- Baboon_frequency_data %>%
   mutate(flight_present = factor(flight_present, levels = c(0, 1), labels = c("No Flight", "Flight")))
 
 #Stacked bar graph for frequency of flight by habitat type
-ggplot(flight_frequency_habitat, aes(x = Habitat, y = Count, fill = Habitat, alpha = flight_present)) +
+frequency_habitat_plot_21 <-
+  ggplot(flight_frequency_habitat, aes(x = Habitat, y = Count, fill = Habitat, alpha = flight_present)) +
   geom_bar(stat = "identity", position = "fill") +  # Proportional stacking
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Apply Acadia colors to Predator.cue
   scale_alpha_manual(values = c("No Flight" = 0.3, "Flight" = 1)) +  # Adjust transparency
@@ -410,7 +415,8 @@ Baboon_vigilance_age_sex <- Baboon_vigilance_data %>%
   ))
 
 #strip plot for proportion vigilance by age_sex_class
-ggplot(Baboon_vigilance_age_sex, aes(x = age_sex_class, y = proportion_vigilant, fill = age_sex_class, color = age_sex_class)) +
+vigilance_prey_plot_21 <-
+  ggplot(Baboon_vigilance_age_sex, aes(x = age_sex_class, y = proportion_vigilant, fill = age_sex_class, color = age_sex_class)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
@@ -459,7 +465,8 @@ Baboon_flight_age_sex <- Baboon_flight_age_sex %>%
   mutate(log_latency = log(latency_to_flee + 1))
 
 #Strip plot for log latency to flee by predator cue
-ggplot(Baboon_flight_age_sex, aes(x = age_sex_class, y = log_latency, fill = age_sex_class, color = age_sex_class)) +
+latency_prey_plot_21 <-
+  ggplot(Baboon_flight_age_sex, aes(x = age_sex_class, y = log_latency, fill = age_sex_class, color = age_sex_class)) +
   geom_boxplot(alpha = 0.4, outlier.shape = NA) +  # Lighter box plot
   geom_jitter(width = 0.2, size = 1.2, alpha = 0.8) +  # Smaller points
   scale_colour_paletteer_d("nationalparkcolors::Acadia") +  # Color scheme for points
@@ -491,7 +498,8 @@ flight_frequency_age_sex <- Baboon_frequency_data %>%
   mutate(flight_present = factor(flight_present, levels = c(0, 1), labels = c("No Flight", "Flight")))
 
 #Stacked bar graph for frequency of flight by habitat type
-ggplot(flight_frequency_age_sex, aes(x = age_sex_class, y = Count, fill = age_sex_class, alpha = flight_present)) +
+frequency_prey_plot_21 <-
+  ggplot(flight_frequency_age_sex, aes(x = age_sex_class, y = Count, fill = age_sex_class, alpha = flight_present)) +
   geom_bar(stat = "identity", position = "fill") +  # Proportional stacking
   scale_fill_paletteer_d("nationalparkcolors::Acadia") +  # Apply Acadia colors to Predator.cue
   scale_alpha_manual(values = c("No Flight" = 0.3, "Flight" = 1)) +  # Adjust transparency
