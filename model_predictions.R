@@ -420,4 +420,81 @@ ggplot(frequency_habitat_only, aes(x = Habitat, y = predicted)) +
   ) +
   theme_minimal()
 
+###FOR 2024
+#fix spacing issue
+Baboon_vigilance_stats_24 <- Baboon_vigilance_stats_24 %>%
+  mutate(predator_cue = factor(trimws(predator_cue)))
+
+unique(Baboon_vigilance_stats_24$predator_cue)
+
+#BY PREDATOR CUE
+#Model for proportion vigilance
+Vigilance_global_model_24 <- glmmTMB(proportion_vigilant_beta ~ predator_cue + Habitat + age_sex_class + (1|site),
+                                     data = Baboon_vigilance_stats_24,
+                                     family = beta_family(),
+                                     na.action = na.fail) 
+
+# Create a grid for prediction
+vigilance_pred_only_24 <- expand.grid(
+  predator_cue = factor(levels(Baboon_vigilance_stats_24$predator_cue), 
+                        levels = levels(Baboon_vigilance_stats_24$predator_cue)),  # Set levels explicitly
+  Habitat = "Open",    
+  age_sex_class = factor("Female_Adult", levels = levels(Baboon_vigilance_stats_24$age_sex_class))      
+)
+View(vigilance_pred_only_24)
+# Get predictions on the response scale
+vigilance_pred_only_24$predicted <- predict(Vigilance_global_model_24, 
+                                         newdata = vigilance_pred_only_24, 
+                                         type = "response", 
+                                         re.form = NA)  # Excludes random effects
+
+# Get predictions with standard errors
+vigilance_pred_with_se_24 <- predict(Vigilance_global_model_24, 
+                        newdata = vigilance_pred_only_24, 
+                        type = "link",  # Get predictions on link scale for CIs
+                        se.fit = TRUE,
+                        re.form = NA)
+
+# Add confidence intervals
+vigilance_pred_only_24$se <- vigilance_pred_with_se_24$se.fit
+vigilance_pred_only_24$lower <- plogis(vigilance_pred_with_se_24$fit - 1.96 * vigilance_pred_with_se_24$se.fit)  # Convert back to response scale
+vigilance_pred_only_24$upper <- plogis(vigilance_pred_with_se_24$fit + 1.96 * vigilance_pred_with_se_24$se.fit)
+
+View(vigilance_pred_only_24)
+# Plot predictions
+ggplot(vigilance_pred_only_24, aes(x = predator_cue, y = predicted)) +
+  geom_point(size = 3, color = "blue") +
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2, color = "black") +
+  labs(
+    title = "Predicted Proportion of Vigilance by Predator Cue",
+    x = "Predator Cue",
+    y = "Predicted Proportion Vigilant"
+  ) +
+  theme_minimal()
+
+# Combine predictions from 2021 and 2024
+vigilance_pred_only <- vigilance_pred_only %>%
+  rename(predator_cue = Predator.cue)
+
+vigilance_pred_only <- vigilance_pred_only %>%
+  mutate(predator_cue = recode(predator_cue, "Wild_dog" = "WD"))
+
+# Add Year column to 2021 predictions
+vigilance_pred_only$Year <- "2021"
+
+# Add Year column to 2024 predictions
+vigilance_pred_only_24$Year <- "2024"
+
+vigilance_pred_combined <- bind_rows(vigilance_pred_only, vigilance_pred_only_24)
+
+ggplot(vigilance_pred_combined, aes(x = predator_cue, y = predicted, color = Year, group = Year)) +
+  geom_point(position = position_dodge(width = 0.3), size = 3) +  # Points for predicted values
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2, position = position_dodge(width = 0.3)) +  # Error bars
+  labs(
+    title = "Predicted Proportion of Vigilance by Predator Cue (2021 vs 2024)",
+    x = "Predator Cue",
+    y = "Predicted Proportion Vigilant"
+  ) +
+  theme_minimal() +
+  scale_color_manual(values = c("2021" = "blue", "2024" = "red"))
 
