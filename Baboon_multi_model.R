@@ -205,3 +205,66 @@ summary(Frequency_model_avg_24)
 
 
 
+#FOR ALL DATA
+View(Baboon_vigilance_stats)
+View(Baboon_vigilance_stats_24)
+
+#Join 2021 and 2024 vigilance stats
+Baboon_vigilance_stats_both <- bind_rows(Baboon_vigilance_stats, Baboon_vigilance_stats_24)
+View(Baboon_vigilance_stats_both)
+
+#change Wild dog name to match in both datasets
+Baboon_vigilance_stats_both <- Baboon_vigilance_stats_both %>%
+  mutate(predator_cue = case_when(
+  predator_cue %in% c("WD", "Wild_dog") ~ "Wild dog",
+    TRUE ~ predator_cue  # Keep all other values as they are
+  ))
+
+#Transform data for beta distribution using Smithson & Verkuilen transformation
+#this is needed because beta distribution requires values to be 0<x<1 but in proportion_vigilance we have exact 0s and 1s
+#this transformation compresses the scale of the data, taking values away from exactly 0 and 1
+Baboon_vigilance_stats_both <- Baboon_vigilance_stats_both %>%
+  mutate(proportion_vigilant_beta = (proportion_vigilant * (n() - 1) + 0.5) / n())
+
+
+#set control as reference level for Predator.cue
+Baboon_vigilance_stats_both <- Baboon_vigilance_stats_both %>%
+  mutate(predator_cue = relevel(factor(predator_cue), ref = "Control"))
+
+
+#set no offspring as reference level
+Baboon_vigilance_stats_both$offspring <- factor(Baboon_vigilance_stats_both$offspring,
+                                              levels = c(0, 1), 
+                                              labels = c("No", "Yes"))
+
+Baboon_vigilance_stats_both$offspring <- relevel(Baboon_vigilance_stats_both$offspring, ref = "No")
+
+
+#set female adult as reference level
+Baboon_vigilance_stats_both$age_sex_class <- factor(Baboon_vigilance_stats_both$age_sex_class)
+Baboon_vigilance_stats_both$age_sex_class <- relevel(Baboon_vigilance_stats_both$age_sex_class, ref = "Female_Adult")
+
+#set open habitat as reference level
+Baboon_vigilance_stats_both$Habitat <- factor(Baboon_vigilance_stats_both$Habitat)
+Baboon_vigilance_stats_both$Habitat <- relevel(Baboon_vigilance_stats_both$Habitat, ref = "Open")
+
+
+View(Baboon_vigilance_stats_both)
+#Global GLMM using beta distribution
+Vigilance_global_model_both <- glmmTMB(proportion_vigilant_beta ~ predator_cue * year + Habitat + age_sex_class + (1|site),
+                                     data = Baboon_vigilance_stats_both,
+                                     family = beta_family(),
+                                     na.action = na.fail) 
+
+#generate model set
+Vigilance_models_both <- dredge(Vigilance_global_model_both)
+
+# Model averaging based on AIC
+Vigilance_model_avg_both <- model.avg(Vigilance_models_both)
+
+# Get model-averaged results
+summary(Vigilance_model_avg_both)
+
+table(Baboon_vigilance_stats_both$predator_cue, Baboon_vigilance_stats_both$year)
+
+
