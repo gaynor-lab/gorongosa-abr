@@ -66,13 +66,22 @@ Baboon_vigilance_stats <- Baboon_vigilance_data %>%
     Presence.of.offspring == "None" ~ 0,   # Assign 0 if "None"
     TRUE ~ 1   # Assign 1 if anything else
   )) %>%
-  group_by(file_name, Habitat, age_sex_class, Camera.trap.site, Predator.cue, Number.of.individuals, Presence_of_offspring) %>%
+  group_by(file_name, Habitat, age_sex_class, Camera.trap.site, Predator.cue, Number.of.individuals, Presence_of_offspring, Year) %>%
   summarise(
     proportion_vigilant = first(na.omit(proportion_vigilant)),  # Get first non-NA value
     .groups = "drop"
   ) %>%
-  drop_na(proportion_vigilant, Predator.cue, Habitat, age_sex_class, Number.of.individuals, Presence_of_offspring) #need to drop NAs from proportion vigilant where total_frames = occluded_frames
+  drop_na(proportion_vigilant, Predator.cue, Habitat, age_sex_class, Number.of.individuals, Presence_of_offspring) %>%
+  # Rename columns to be same as 2024
+  rename(
+    site = Camera.trap.site,
+    predator_cue = Predator.cue,
+    group_number = Number.of.individuals,
+    offspring = Presence_of_offspring,
+    year = Year
+  )
 
+View(Baboon_vigilance_stats)
 #DATAFRAME FOR LATENCY TO FLEE
 
 #filter videos that have No_sound or sound.quality = poor or a sound delay as they will not be included in analysis

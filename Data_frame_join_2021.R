@@ -117,7 +117,7 @@ Final_2021 <- Final_2021 %>%
 
 #Rename WD to Wild_dog
 Final_2021 <- Final_2021 %>%
-  mutate(Predator.cue = str_replace(Predator.cue, "WD", "Wild_dog"))
+  mutate(Predator.cue = str_replace(Predator.cue, "WD", "Wild dog"))
 
 #Rename NA predator cues to No_sound
 Final_2021 <- Final_2021 %>%

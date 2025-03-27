@@ -77,7 +77,7 @@ Baboon_vigilance_stats_24 <- Baboon_vigilance_data_24 %>%
     sex == "M" & age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   )) %>%
-  group_by(file_name, Habitat, age_sex_class, site, predator_cue, group_number, offspring) %>%
+  group_by(file_name, Habitat, age_sex_class, site, predator_cue, group_number, offspring, year) %>%
   summarise(
     proportion_vigilant = first(na.omit(proportion_vigilant)),  # Get first non-NA value
     .groups = "drop"
