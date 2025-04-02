@@ -5,6 +5,39 @@ install.packages("cowplot")
 library(ggplot2)
 library(cowplot)
 
+
+
+vigilance_plots <- plot_grid(plot1, predicted_vigilance_pred_plot, plot3, plot4, plot5, plot6, 
+                           ncol = 3, nrow = 2)  # Arrange plots in 3 columns and 2 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #PREDATOR IDENTITY
 
 #Vigilance plots 
