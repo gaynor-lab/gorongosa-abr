@@ -1,8 +1,7 @@
 #Behavioural analysis for 2021 data
 
 #load packages
-install.packages("paletteer")
-library(paletteer)#for colour scheme
+library(paletteer)
 library(dplyr)
 library(ggplot2)
 library(stringr)
