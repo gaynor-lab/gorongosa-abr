@@ -148,13 +148,21 @@ Baboon_flight_stats <- Baboon_flight_data %>%
     Presence.of.offspring == "None" ~ 0,   # Assign 0 if "None"
     TRUE ~ 1   # Assign 1 if anything else
   )) %>%
-  group_by(file_name, Habitat, age_sex_class, Camera.trap.site, Predator.cue, Number.of.individuals, Presence_of_offspring) %>%
+  group_by(file_name, Habitat, age_sex_class, Camera.trap.site, Predator.cue, Number.of.individuals, Presence_of_offspring, Year) %>%
   summarise(
   latency_to_flee = first(na.omit(latency_to_flee_s)),  # Get first non-NA value
     .groups = "drop"
       ) %>%
   drop_na(latency_to_flee, Predator.cue, Habitat, age_sex_class, Number.of.individuals, Presence_of_offspring)%>% #need to drop one video where age_sex_class is NA for analysis
-  mutate(log_latency_to_flee = log(latency_to_flee + 1)) 
+  mutate(log_latency_to_flee = log(latency_to_flee + 1)) %>%
+  # Rename columns to be same as 2024
+  rename(
+    site = Camera.trap.site,
+    predator_cue = Predator.cue,
+    group_number = Number.of.individuals,
+    offspring = Presence_of_offspring,
+    year = Year
+  )
 
 #DATAFRAME FOR FLIGHT FREQUENCY
 
@@ -197,12 +205,20 @@ Baboon_frequency_stats <- Baboon_frequency_data %>%
     Presence.of.offspring == "None" ~ 0,   # Assign 0 if "None"
     TRUE ~ 1   # Assign 1 if anything else
   )) %>%
-  group_by(file_name, Habitat, age_sex_class, Camera.trap.site, Predator.cue, Number.of.individuals, Presence_of_offspring, flight_present) %>%
+  group_by(file_name, Habitat, age_sex_class, Camera.trap.site, Predator.cue, Number.of.individuals, Presence_of_offspring, flight_present, Year) %>%
   summarise(
     flight_present = first(na.omit(flight_present)),  # Get first non-NA value
     .groups = "drop"
   ) %>%
-  drop_na(Predator.cue, Habitat, age_sex_class, Number.of.individuals, Presence_of_offspring) #need to drop NAs from proportion vigilant where total_frames = occluded_frames
+  drop_na(Predator.cue, Habitat, age_sex_class, Number.of.individuals, Presence_of_offspring) %>% #need to drop NAs from proportion vigilant where total_frames = occluded_frames
+# Rename columns to be same as 2024
+rename(
+  site = Camera.trap.site,
+  predator_cue = Predator.cue,
+  group_number = Number.of.individuals,
+  offspring = Presence_of_offspring,
+  year = Year
+)
 
 #PREDATOR IDENTITY ANALYSIS
 
