@@ -159,7 +159,7 @@ Baboon_flight_stats_24 <- Baboon_flight_data_24 %>%
     sex == "M" & age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   )) %>%
-  group_by(file_name, Habitat, age_sex_class, site, predator_cue, group_number, offspring) %>%
+  group_by(file_name, Habitat, age_sex_class, site, predator_cue, group_number, offspring, year) %>%
   summarise(
     latency_to_flee = first(na.omit(latency_to_flee_s)),  # Get first non-NA value
     .groups = "drop"
@@ -214,7 +214,7 @@ Baboon_frequency_stats_24 <- Baboon_frequency_data_24 %>%
     sex == "M" & age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   )) %>%
-  group_by(file_name, Habitat, age_sex_class, site, predator_cue, group_number, offspring, flight_present) %>%
+  group_by(file_name, Habitat, age_sex_class, site, predator_cue, group_number, offspring, flight_present, year) %>%
   summarise(
     flight_present = first(na.omit(flight_present)),  # Get first non-NA value
     .groups = "drop"
