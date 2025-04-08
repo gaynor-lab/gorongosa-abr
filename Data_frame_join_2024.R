@@ -92,10 +92,6 @@ Final_2024 <- Final_2024 %>%
     )
   )
 
-#Rename WD to Wild_dog
-Final_2024 <- Final_2024 %>%
-  mutate(predator_cue = str_replace(Predator.cue, "WD", "Wild dog"))
-
 #fix typo in Walking_V
 Final_2024 <- Final_2024 %>%
   mutate(Behaviour = ifelse(Behaviour == "Waking_V", "Walking_V", Behaviour))

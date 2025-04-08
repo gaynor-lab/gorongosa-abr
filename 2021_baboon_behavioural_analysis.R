@@ -48,6 +48,9 @@ Baboon_vigilance_data <- Baboon_vigilance_data %>%
       
   ))
 
+View(Baboon_vigilance_data)
+View(Baboon_vigilance_data_24)
+
 #Dataframe for proportion vigilance model
 Baboon_vigilance_stats <- Baboon_vigilance_data %>%
   mutate(Habitat = case_when(
@@ -57,7 +60,8 @@ Baboon_vigilance_stats <- Baboon_vigilance_data %>%
   )) %>%
   mutate(age_sex_class = case_when(
     Focal.individual.sex == "J" & Focal.individual.age == "J" ~ "Juvenile",
-    Focal.individual.sex == "F" & Focal.individual.age == "A" ~ "Female_Adult",
+    Focal.individual.sex == "F" & Focal.individual.age == "A" & Presence.of.offspring == 1 ~ "Female_Adult_with_offspring",
+    Focal.individual.sex == "F" & Focal.individual.age == "A" & Presence.of.offspring == "None" ~ "Female_Adult_no_offspring",
     Focal.individual.sex == "M" & Focal.individual.age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   )) %>%
@@ -139,7 +143,8 @@ Baboon_flight_stats <- Baboon_flight_data %>%
   )) %>%
   mutate(age_sex_class = case_when(
     Focal.individual.sex == "J" & Focal.individual.age == "J" ~ "Juvenile",
-    Focal.individual.sex == "F" & Focal.individual.age == "A" ~ "Female_Adult",
+    Focal.individual.sex == "F" & Focal.individual.age == "A" & Presence.of.offspring == 1 ~ "Female_Adult_with_offspring",
+    Focal.individual.sex == "F" & Focal.individual.age == "A" & Presence.of.offspring == "None" ~ "Female_Adult_no_offspring",
     Focal.individual.sex == "M" & Focal.individual.age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   )) %>%
@@ -163,6 +168,7 @@ Baboon_flight_stats <- Baboon_flight_data %>%
     year = Year
   )
 
+View(Baboon_flight_stats)
 #DATAFRAME FOR FLIGHT FREQUENCY
 
 #filter videos that have No_sound or sound.quality = poor or a sound delay as they will not be included in analysis
@@ -196,7 +202,8 @@ Baboon_frequency_stats <- Baboon_frequency_data %>%
   )) %>%
   mutate(age_sex_class = case_when(
     Focal.individual.sex == "J" & Focal.individual.age == "J" ~ "Juvenile",
-    Focal.individual.sex == "F" & Focal.individual.age == "A" ~ "Female_Adult",
+    Focal.individual.sex == "F" & Focal.individual.age == "A" & Presence.of.offspring == 1 ~ "Female_Adult_with_offspring",
+    Focal.individual.sex == "F" & Focal.individual.age == "A" & Presence.of.offspring == "None" ~ "Female_Adult_no_offspring",
     Focal.individual.sex == "M" & Focal.individual.age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   )) %>%
@@ -219,6 +226,7 @@ rename(
   year = Year
 )
 
+View(Baboon_frequency_stats)
 #PREDATOR IDENTITY ANALYSIS
 
 #PREDATOR IDENTITY VIGILANCE 

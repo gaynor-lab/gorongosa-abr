@@ -16,7 +16,7 @@ Baboon_vigilance_data_24 <- Final_2024 %>%
 #create new column where Walking_V, Staring, standing and staring, Scanning, Startling = Vigilant, Flight = Flight, Occluded = Occluded, and any other behaviour is Non_vigilant
 Baboon_vigilance_data_24 <- Baboon_vigilance_data_24 %>%
   mutate(behaviour_class = case_when(
-    Behaviour %in% c("Walking_V", "Staring", "Scanning","Stand_stare","Startling") ~ "Vigilant",
+    Behaviour %in% c("Waking_V", "Staring", "Scanning","Stand_stare","Startling") ~ "Vigilant",
     Behaviour == "Flight" ~ "Flight",
     Behaviour == "Occluded" ~ "Occluded",
     TRUE ~ "Non_vigilant"
@@ -63,7 +63,6 @@ Baboon_vigilance_data_24 <- Baboon_vigilance_data_24 %>%
     
   ))
 
-
 #Dataframe for proportion vigilance model
 Baboon_vigilance_stats_24 <- Baboon_vigilance_data_24 %>%
   mutate(Habitat = case_when(
@@ -73,7 +72,8 @@ Baboon_vigilance_stats_24 <- Baboon_vigilance_data_24 %>%
   )) %>%
   mutate(age_sex_class = case_when(
     sex == "J" & age == "J" ~ "Juvenile",
-    sex == "F" & age == "A" ~ "Female_Adult",
+    sex == "F" & age == "A" & offspring == 1 ~ "Female_Adult_with_offspring",
+    sex == "F" & age == "A" & offspring == 0 ~ "Female_Adult_no_offspring",
     sex == "M" & age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   )) %>%
@@ -83,6 +83,7 @@ Baboon_vigilance_stats_24 <- Baboon_vigilance_data_24 %>%
     .groups = "drop"
   ) %>%
   drop_na(proportion_vigilant, predator_cue, Habitat, age_sex_class, group_number, offspring) #need to drop NAs from proportion vigilant where total_frames = occluded_frames
+
 
 #DATAFRAME FOR LATENCY TO FLEE
 
@@ -133,6 +134,9 @@ Baboon_flight_data_24 <- Baboon_flight_data_24 %>%
 
 View(Baboon_flight_data_24)
 
+Baboon_flight_data_24 %>%
+  summarise(unique_file_names = n_distinct(file_name))
+
 #convert frames until seconds = latency by dividing by 30 bc 1s = 30 frames
 Baboon_flight_data_24 <- Baboon_flight_data_24 %>%
   mutate(latency_to_flee_s = rows_until_flight / 30)
@@ -155,7 +159,8 @@ Baboon_flight_stats_24 <- Baboon_flight_data_24 %>%
   )) %>%
   mutate(age_sex_class = case_when(
     sex == "J" & age == "J" ~ "Juvenile",
-    sex == "F" & age == "A" ~ "Female_Adult",
+    sex == "F" & age == "A" & offspring == 1 ~ "Female_Adult_with_offspring",
+    sex == "F" & age == "A" & offspring == 0 ~ "Female_Adult_no_offspring",
     sex == "M" & age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   )) %>%
@@ -210,7 +215,8 @@ Baboon_frequency_stats_24 <- Baboon_frequency_data_24 %>%
   )) %>%
   mutate(age_sex_class = case_when(
     sex == "J" & age == "J" ~ "Juvenile",
-    sex == "F" & age == "A" ~ "Female_Adult",
+    sex == "F" & age == "A" & offspring == 1 ~ "Female_Adult_with_offspring",
+    sex == "F" & age == "A" & offspring == 0 ~ "Female_Adult_no_offspring",
     sex == "M" & age == "A" ~ "Male_Adult",
     TRUE ~ NA_character_  # Default if nothing matches
   )) %>%
@@ -225,7 +231,7 @@ Baboon_frequency_stats_24 <- Baboon_frequency_data_24 %>%
 
 #PREDATOR IDENTITY VIGILANCE 
 
-#group by file_name and exclude those that fled immediately
+#group by predaor_cue and hunting_mode
 Baboon_vigilance_predatorcue_24 <- Baboon_vigilance_data_24 %>%
   group_by(predator_cue, file_name, Hunting_mode) %>%
   summarise(proportion_vigilant = first(na.omit(proportion_vigilant)), .groups = "drop") #because NA values are videos where the baboon was occluded the entire time
@@ -250,6 +256,7 @@ vigilance_predcue_plot_24 <-
         panel.grid = element_blank(),
         legend.position = "right")  
 
+View(Baboon_vigilance_predatorcue_24)
 #PREDATOR IDENTITY LATENCY TO FLEE
 
 View(Baboon_flight_predatorcue_24)
@@ -306,6 +313,8 @@ flight_frequency_predatorcue_24 <- Baboon_frequency_data_24 %>%
   mutate(predator_cue = factor(predator_cue, levels = c("Leopard", "Cheetah", "Lion","WD","Hyena", "Control"))) %>%  
   mutate(flight_present = factor(flight_present, levels = c(0, 1), labels = c("No Flight", "Flight")))%>% 
   filter(!is.na(predator_cue))
+
+View(flight_frequency_predatorcue_24)
 
 #Stacked bar graph for frequency of flight by predator cue
 frequency_predcue_plot_24 <-

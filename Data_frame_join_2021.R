@@ -9,18 +9,15 @@ library(stringr)
 library(tidyverse)
 
 #Import second watch metadata in CSV format 
-B_21_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/gorongosa-abr/Baboon_second_watch_2021_fixed.csv")
+B_21_second <- read.csv("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/gorongosa-abr/gorongosa-abr/Baboon_second_watch_2021_fixed.csv")
 
 #make file name column in second watch data to join with file_name from CVAT annotations
 B_21_second<- B_21_second %>%
   mutate(file_name = paste(Year, Camera.trap.site,video_name, sep = "_"))
 View(B_21_second)
 
-#Import CVAT annotations in CVAT1.1 format to XML
-Baboon_2021_vid_CVAT <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_cvat for video 1.1/annotations.xml")
-
 #Convert XML to dataframe
-xml_file <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa-abr/project_2021 baboon data_annotations_2025_02_23_17_58_16_cvat for video 1.1/annotations.xml")
+xml_file <- read_xml("C:/Users/sophi/OneDrive/Desktop/gorongosa_baboon/gorongosa-abr/gorongosa-abr/2021_annotations_april.xml")
 
 # Extract all tasks (task = 1 video)
 tasks <- xml_find_all(xml_file, ".//task")
@@ -32,7 +29,6 @@ task_df <- map_df(tasks, ~{
     task_name = xml_text(xml_find_first(.x, ".//name"))
   )
 })
-head(task_df)
 
 # Create annotations with task ID
 task_df <- map_df(tasks, ~{
@@ -41,7 +37,6 @@ task_df <- map_df(tasks, ~{
     task_name = xml_text(xml_find_first(.x, ".//name"))
   )
 })
-head(task_df)
 
 # Extract all <track> nodes
 tracks <- xml_find_all(xml_file, ".//track")
@@ -61,8 +56,6 @@ frame_df <- map_df(tracks, ~{
   ))
 })
 
-# View the resulting data frame
-print(frame_df)
 
 # Join with file name
 frame_df2 <- left_join(frame_df, task_df)
@@ -122,7 +115,4 @@ Final_2021 <- Final_2021 %>%
 #Rename NA predator cues to No_sound
 Final_2021 <- Final_2021 %>%
   mutate(Predator.cue = if_else(is.na(Predator.cue), "No_sound", Predator.cue))
-
-
-
 

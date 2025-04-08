@@ -36,23 +36,16 @@ Baboon_vigilance_stats_both <- Baboon_vigilance_stats_both %>%
   mutate(predator_cue = relevel(factor(predator_cue), ref = "Control"))
 
 
-#set no offspring as reference level
-Baboon_vigilance_stats_both$offspring <- factor(Baboon_vigilance_stats_both$offspring,
-                                              levels = c(0, 1), 
-                                              labels = c("No", "Yes"))
-Baboon_vigilance_stats_both$offspring <- relevel(Baboon_vigilance_stats_both$offspring, ref = "No")
-
-
 #set female adult as reference level
 Baboon_vigilance_stats_both$age_sex_class <- factor(Baboon_vigilance_stats_both$age_sex_class)
-Baboon_vigilance_stats_both$age_sex_class <- relevel(Baboon_vigilance_stats_both$age_sex_class, ref = "Female_Adult")
+Baboon_vigilance_stats_both$age_sex_class <- relevel(Baboon_vigilance_stats_both$age_sex_class, ref = "Female_Adult_no_offspring")
 
 #set open habitat as reference level
 Baboon_vigilance_stats_both$Habitat <- factor(Baboon_vigilance_stats_both$Habitat)
 Baboon_vigilance_stats_both$Habitat <- relevel(Baboon_vigilance_stats_both$Habitat, ref = "Open")
 
 #Global GLMM using beta distribution
-Vigilance_global_model_both <- glmmTMB(proportion_vigilant_beta ~ predator_cue * year + Habitat + age_sex_class + group_number + offspring + (1|site),
+Vigilance_global_model_both <- glmmTMB(proportion_vigilant_beta ~ predator_cue * year + Habitat + age_sex_class + group_number + (1|site),
                                      data = Baboon_vigilance_stats_both,
                                      family = beta_family(),
                                      na.action = na.fail) 
@@ -65,6 +58,7 @@ Vigilance_model_avg_both <- model.avg(Vigilance_models_both)
 
 # Get model-averaged results
 summary(Vigilance_model_avg_both)
+print(Vigilance_model_avg_both)
 
 
 #LATENCY TO FLEE
@@ -76,6 +70,13 @@ View(Baboon_flight_stats_both)
 #set 2021 as refrence level
 Baboon_flight_stats_both <- Baboon_flight_stats_both %>%
   mutate(year = factor(year, levels = c(2021, 2024)))
+
+#change Wild dog name to match in both datasets
+Baboon_flight_stats_both <- Baboon_flight_stats_both %>%
+  mutate(predator_cue = case_when(
+    predator_cue %in% c("WD", "Wild_dog") ~ "Wild dog",
+    TRUE ~ predator_cue  # Keep all other values as they are
+  ))
 
 #fix spacing issue in predator names
 Baboon_flight_stats_both <- Baboon_flight_stats_both %>%
@@ -94,25 +95,10 @@ Baboon_flight_stats_both <- Baboon_flight_stats_both %>%
 Baboon_flight_stats_both <- Baboon_flight_stats_both %>%
   mutate(predator_cue = relevel(factor(predator_cue), ref = "Control"))
 
-#create column to compare females with and without offspring
-Baboon_flight_stats_both <- Baboon_flight_stats_both %>%
-  mutate(Female_adult_offspring = case_when(
-    age_sex_class == "Female_Adult" & offspring == 0 ~ 0,  # No offspring
-    age_sex_class == "Female_Adult" & offspring == 1 ~ 1,  # Has offspring
-    TRUE ~ NA_real_  # For all other cases, assign NA (if needed)
-  ))
-View(Baboon_flight_stats_both)
-
-#set no offspring as reference level
-Baboon_flight_stats_both$offspring <- factor(Baboon_flight_stats_both$offspring,
-                                                levels = c(0, 1), 
-                                                labels = c("No", "Yes"))
-Baboon_flight_stats_both$offspring <- relevel(Baboon_flight_stats_both$offspring, ref = "No")
-
 
 #set female adult as reference level
 Baboon_flight_stats_both$age_sex_class <- factor(Baboon_flight_stats_both$age_sex_class)
-Baboon_flight_stats_both$age_sex_class <- relevel(Baboon_flight_stats_both$age_sex_class, ref = "Female_Adult")
+Baboon_flight_stats_both$age_sex_class <- relevel(Baboon_flight_stats_both$age_sex_class, ref = "Female_Adult_no_offspring")
 
 #set open habitat as reference level
 Baboon_flight_stats_both$Habitat <- factor(Baboon_flight_stats_both$Habitat)
@@ -120,7 +106,7 @@ Baboon_flight_stats_both$Habitat <- relevel(Baboon_flight_stats_both$Habitat, re
 
 
 #Global GLMM with gaussian (normal) distribution
-Latency_global_model_both <- glmmTMB(log_latency_to_flee ~ predator_cue * year + Habitat + age_sex_class + group_number + offspring + (1|site),
+Latency_global_model_both <- glmmTMB(log_latency_to_flee ~ predator_cue * year + Habitat + age_sex_class + group_number + (1|site),
                                 data = Baboon_flight_stats_both,
                                 family = gaussian(),
                                 na.action = na.fail)
@@ -133,7 +119,7 @@ Latency_model_avg_both <- model.avg(Latency_models_both)
 
 # Get model-averaged results
 summary(Latency_model_avg_both)
-
+print(Latency_model_avg_both)
 
 #FLIGHT FREQUENCY
 
@@ -141,16 +127,17 @@ summary(Latency_model_avg_both)
 Baboon_frequency_stats_both <- bind_rows(Baboon_frequency_stats, Baboon_frequency_stats_24)
 View(Baboon_frequency_stats_both)
 
-Baboon_frequency_stats_both <- Baboon_frequency_stats_both %>%
-  mutate(predator_cue = str_trim(predator_cue))
-table(Baboon_frequency_stats_both$predator_cue, Baboon_frequency_stats_both$year)
-
 #change Wild dog name to match in both datasets
 Baboon_frequency_stats_both <- Baboon_frequency_stats_both %>%
   mutate(predator_cue = case_when(
     predator_cue %in% c("WD", "Wild_dog") ~ "Wild dog",
     TRUE ~ predator_cue  # Keep all other values as they are
   ))
+
+#fix spacing issue
+Baboon_frequency_stats_both <- Baboon_frequency_stats_both %>%
+  mutate(predator_cue = str_trim(predator_cue))
+table(Baboon_frequency_stats_both$predator_cue, Baboon_frequency_stats_both$year)
 
 
 #set control as reference level for Predator.cue
@@ -161,24 +148,17 @@ Baboon_frequency_stats_both <- Baboon_frequency_stats_both %>%
 Baboon_frequency_stats_both <- Baboon_frequency_stats_both %>%
   mutate(year = factor(year, levels = c(2021, 2024)))
 
-#set no offspring as reference level
-Baboon_frequency_stats_both$offspring <- factor(Baboon_frequency_stats_24$offspring,
-                                              levels = c(0, 1), 
-                                              labels = c("No", "Yes"))
-
-Baboon_frequency_stats_both$offspring <- relevel(Baboon_frequency_stats_24$offspring, ref = "No")
-
 
 #set female adult as reference level
 Baboon_frequency_stats_both$age_sex_class <- factor(Baboon_frequency_stats_both$age_sex_class)
-Baboon_frequency_stats_both$age_sex_class <- relevel(Baboon_frequency_stats_both$age_sex_class, ref = "Female_Adult")
+Baboon_frequency_stats_both$age_sex_class <- relevel(Baboon_frequency_stats_both$age_sex_class, ref = "Female_Adult_no_offspring")
 
 #set open habitat as reference level
 Baboon_frequency_stats_both$Habitat <- factor(Baboon_frequency_stats_both$Habitat)
 Baboon_frequency_stats_both$Habitat <- relevel(Baboon_frequency_stats_both$Habitat, ref = "Open")
 
 #Global GLMM with binomial distribution
-Frequency_global_model_both <- glmmTMB(flight_present ~ predator_cue * year + Habitat + age_sex_class + group_number + offspring + (1|site),
+Frequency_global_model_both <- glmmTMB(flight_present ~ predator_cue * year + Habitat + age_sex_class + group_number + (1|site),
                                      data = Baboon_frequency_stats_both,
                                      family = binomial(),
                                      na.action = na.fail)
@@ -191,5 +171,5 @@ Frequency_model_avg_both <- model.avg(Frequency_models_both)
 
 # Get model-averaged results
 summary(Frequency_model_avg_both)
-
+print(Frequency_model_avg_both)
 
