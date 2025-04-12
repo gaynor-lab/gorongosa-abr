@@ -41,11 +41,10 @@ leaflet(ABR_data) %>%
 #try with labels
 leaflet(ABR_data) %>%
   addProviderTiles("Esri.WorldTopoMap") %>%
-  #addTiles() %>%
   addCircleMarkers(
     lng = ~Long,
     lat = ~Lat,
-    fillColor = ~ifelse(Habitat == "Open", "blue", "green"),
+    fillColor = ~ifelse(Habitat == "Open", "orange", "yellow"),
     color = ~ifelse(Site %in% c("D09", "N03"), "red", "none"),
     weight = ~ifelse(Site %in% c("D09", "N03"), 2, 2),
     radius = ~sqrt(total) * 1.1,
@@ -57,9 +56,9 @@ leaflet(ABR_data) %>%
     label = ~Site,
     labelOptions = labelOptions(
       noHide = TRUE,
-      direction = "right",  # this pushes the label to the right
+      direction = "right",
       textOnly = TRUE,
-      offset = c(12, 0),    # fine-tunes x (horizontal), y (vertical) offset
+      offset = c(12, 0),
       style = list(
         "color" = "black",
         "font-size" = "13px",
@@ -72,9 +71,15 @@ leaflet(ABR_data) %>%
   ) %>%
   addLegend(
     position = "bottomright",
-    colors = c("blue", "green"),
+    colors = c("orange", "yellow"),
     labels = c("Open", "Closed"),
     title = "Habitat Type",
     opacity = 0.7
+  ) %>%
+  addScaleBar(position = "bottomright", options = scaleBarOptions(metric = TRUE)) %>%
+  addControl(
+    html = "<div style='font-size:16px; font-weight:bold;'>↑<br>N</div>",
+    position = "topright"
   )
+
 
