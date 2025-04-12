@@ -58,7 +58,7 @@ var_2024
 #test habituation effect 2021
 
 #vigilance dataframe
-habituation_vigilance <- Baboon_vigilance_stats %>%
+habituation_vigilance_21 <- Baboon_vigilance_stats %>%
   select(file_name, proportion_vigilant) %>%
   mutate(month = sub(".*?_(\\d{2}).*", "\\1", file_name)) %>%
   mutate(day = sub(".*?_(\\d{2})(\\d{2}).*", "\\2", file_name)) %>%
@@ -71,6 +71,10 @@ habituation_vigilance <- Baboon_vigilance_stats %>%
     month == 06 & day >= 8 & day <= 14 ~ 2,
     month == 06 & day >= 15 & day <= 21 ~ 3,
     month == 06 & day >= 22 & day <= 30 ~ 4,
+    month == 01 & day >= 1 & day <= 7 ~ 1, #because at site G06, june was labelled at 01 due to camera reset
+    month == 01 & day >= 8 & day <= 14 ~ 2,
+    month == 01 & day >= 15 & day <= 21 ~ 3,
+    month == 01 & day >= 22 & day <= 31 ~ 4,
     month == 07 & day >= 1 & day <= 7 ~ 5,
     month == 07 & day >= 8 & day <= 14 ~ 6,
     month == 07 & day >= 15 & day <= 21 ~ 7,
@@ -83,10 +87,11 @@ habituation_vigilance <- Baboon_vigilance_stats %>%
   )) %>%
   mutate(week = factor(week))
 
+View(habituation_vigilance_21)
 # Run ANOVA to test for significant effect between 'proportion_vigilant' and 'week'
-anova_hab_vig_2021 <- aov(proportion_vigilant ~ week, data = habituation_vigilance)
+anova_hab_vig_2021 <- aov(proportion_vigilant ~ week, data = habituation_vigilance_21)
 summary(anova_hab_vig_2021)
-#p = 0.00934
+#p = 0.0262
 
 # Perform Tukey's HSD test
 tukey_result <- TukeyHSD(anova_hab_vig_2021)
@@ -154,7 +159,7 @@ habituation_frequency_21 <- Baboon_frequency_stats %>%
 anova_hab_freq_2021 <- aov(flight_present ~ week, data = habituation_frequency_21)
 summary(anova_hab_freq_2021)
 #not significant
-
+View(habituation_frequency_21)
 
 
 #test habituation effect 2024
@@ -184,6 +189,7 @@ habituation_vigilance_24 <- Baboon_vigilance_stats_24 %>%
     TRUE ~ NA_real_
   )) %>%
   mutate(week = factor(week))
+
 
 # Run ANOVA to test for significant effect between 'proportion_vigilant' and 'week'
 anova_hab_vig_2024 <- aov(proportion_vigilant ~ week, data = habituation_vigilance_24)

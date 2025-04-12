@@ -2,6 +2,7 @@
 library(glmmTMB)
 library(dplyr)
 library(MuMIn)
+citation("MuMIn")
 
 #PROPORTION OF TIME SPENT VIGILANT
 
