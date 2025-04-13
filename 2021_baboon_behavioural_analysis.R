@@ -42,8 +42,8 @@ Baboon_vigilance_data <- Baboon_vigilance_data %>%
 #add column grouping predator cues by hunting mode
 Baboon_vigilance_data <- Baboon_vigilance_data %>%
   mutate(Hunting_mode = case_when(
-      Predator.cue %in% c("Lion", "Cheetah", "Leopard") ~ "Ambush",
-      Predator.cue %in% c("Hyena", "Wild_dog") ~ "Coursing",
+      Predator.cue %in% c("Lion", "Cheetah") ~ "Ambush",
+      Predator.cue %in% c("Hyena", "Wild_dog", "Leopard") ~ "Coursing",
       Predator.cue %in% c("Control") ~ "Control",
       
   ))
@@ -128,8 +128,8 @@ Baboon_flight_data <- Baboon_flight_data %>%
 #add column grouping predator cues by hunting mode
 Baboon_flight_data <- Baboon_flight_data %>%
   mutate(Hunting_mode = case_when(
-    Predator.cue %in% c("Lion", "Cheetah", "Leopard") ~ "Ambush",
-    Predator.cue %in% c("Hyena", "Wild_dog") ~ "Coursing",
+    Predator.cue %in% c("Lion", "Cheetah") ~ "Ambush",
+    Predator.cue %in% c("Hyena", "Wild_dog", "Leopard") ~ "Coursing",
     Predator.cue %in% c("Control") ~ "Control",
     
   ))
@@ -187,8 +187,8 @@ Baboon_frequency_data <- Baboon_frequency_data %>%
 #add column grouping predator cues by hunting mode
 Baboon_frequency_data <- Baboon_frequency_data %>%
   mutate(Hunting_mode = case_when(
-    Predator.cue %in% c("Lion", "Cheetah", "Leopard") ~ "Ambush",
-    Predator.cue %in% c("Hyena", "Wild_dog") ~ "Coursing",
+    Predator.cue %in% c("Lion", "Cheetah") ~ "Ambush",
+    Predator.cue %in% c("Hyena", "Wild_dog", "Leopard") ~ "Coursing",
     Predator.cue %in% c("Control") ~ "Control",
     
   ))

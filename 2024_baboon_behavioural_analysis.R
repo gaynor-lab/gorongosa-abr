@@ -16,7 +16,7 @@ Baboon_vigilance_data_24 <- Final_2024 %>%
 #create new column where Walking_V, Staring, standing and staring, Scanning, Startling = Vigilant, Flight = Flight, Occluded = Occluded, and any other behaviour is Non_vigilant
 Baboon_vigilance_data_24 <- Baboon_vigilance_data_24 %>%
   mutate(behaviour_class = case_when(
-    Behaviour %in% c("Waking_V", "Staring", "Scanning","Stand_stare","Startling") ~ "Vigilant",
+    Behaviour %in% c("Walking_V", "Staring", "Scanning","Stand_stare","Startling") ~ "Vigilant",
     Behaviour == "Flight" ~ "Flight",
     Behaviour == "Occluded" ~ "Occluded",
     TRUE ~ "Non_vigilant"
@@ -57,8 +57,8 @@ Baboon_vigilance_data_24 <- Baboon_vigilance_data_24 %>%
 #add column grouping predator cues by hunting mode
 Baboon_vigilance_data_24 <- Baboon_vigilance_data_24 %>%
   mutate(Hunting_mode = case_when(
-    predator_cue %in% c("Lion", "Cheetah", "Leopard") ~ "Ambush",
-    predator_cue %in% c("Hyena", "WD") ~ "Coursing",
+    predator_cue %in% c("Lion", "Cheetah") ~ "Ambush",
+    predator_cue %in% c("Hyena", "WD", "Leopard") ~ "Coursing",
     predator_cue %in% c("Control") ~ "Control",
     
   ))
@@ -144,8 +144,8 @@ Baboon_flight_data_24 <- Baboon_flight_data_24 %>%
 #add column grouping predator cues by hunting mode
 Baboon_flight_data_24 <- Baboon_flight_data_24 %>%
   mutate(Hunting_mode = case_when(
-    predator_cue %in% c("Lion", "Cheetah", "Leopard") ~ "Ambush",
-    predator_cue %in% c("Hyena", "WD") ~ "Coursing",
+    predator_cue %in% c("Lion", "Cheetah") ~ "Ambush",
+    predator_cue %in% c("Hyena", "WD", "Leopard") ~ "Coursing",
     predator_cue %in% c("Control") ~ "Control",
     
   ))
@@ -200,8 +200,8 @@ Baboon_frequency_data_24 <- Baboon_frequency_data_24 %>%
 #add column grouping predator cues by hunting mode
 Baboon_frequency_data_24 <- Baboon_frequency_data_24 %>%
   mutate(Hunting_mode = case_when(
-    predator_cue %in% c("Lion", "Cheetah", "Leopard") ~ "Ambush",
-    predator_cue %in% c("Hyena", "WD") ~ "Coursing",
+    predator_cue %in% c("Lion", "Cheetah") ~ "Ambush",
+    predator_cue %in% c("Hyena", "WD", "Leopard") ~ "Coursing",
     predator_cue %in% c("Control") ~ "Control",
     
   ))
