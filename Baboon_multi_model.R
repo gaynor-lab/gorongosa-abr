@@ -60,6 +60,16 @@ Vigilance_model_avg_both <- model.avg(Vigilance_models_both)
 # Get model-averaged results
 summary(Vigilance_model_avg_both)
 print(Vigilance_model_avg_both)
+formula(Vigilance_models_both)
+
+#R-squared 
+r.squaredGLMM(Vigilance_global_model_both)
+
+# Extract top model (lowest AIC)
+top_model <- get.models(Vigilance_models_both, subset = 1)[[1]]
+
+# Get R-squared
+r.squaredGLMM(top_model)
 
 
 #LATENCY TO FLEE
@@ -121,6 +131,7 @@ Latency_model_avg_both <- model.avg(Latency_models_both)
 # Get model-averaged results
 summary(Latency_model_avg_both)
 print(Latency_model_avg_both)
+r.squaredGLMM(Latency_global_model_both)
 
 #FLIGHT FREQUENCY
 
@@ -173,4 +184,11 @@ Frequency_model_avg_both <- model.avg(Frequency_models_both)
 # Get model-averaged results
 summary(Frequency_model_avg_both)
 print(Frequency_model_avg_both)
+r.squaredGLMM(Frequency_global_model_both)
+
+install.packages("performance")
+library(performance)
+
+# Get R² for your global model
+r2(Frequency_global_model_both)
 

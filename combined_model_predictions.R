@@ -1,14 +1,13 @@
 #GRAPH MODEL PREDICTIONS
 c("#FED789FF", "#023743FF", "#72874EFF", "#476F84FF", "#A4BED5FF", "#453947FF")
 
-#PROPORTION VIGILANCE BY PREDATOR CUE
+#PROPORTION VIGILANCE BY PREDATOR CUE BY YEAR
 # Create a new dataset with combinations of explanatory variables
 vigilance_pred_only <- expand.grid(
   predator_cue = unique(Baboon_vigilance_stats_both$predator_cue), # Vary predator cue
   Habitat = factor("Open", levels = levels(Baboon_vigilance_stats_both$Habitat)),  
   age_sex_class = factor("Female_Adult_no_offspring", levels = levels(Baboon_vigilance_stats_both$age_sex_class)),  
   group_number = mean(Baboon_vigilance_stats_both$group_number, na.rm = TRUE),
-  offspring = factor("No", levels = levels(Baboon_vigilance_stats_both$offspring)),
   year = c(2021, 2024) 
 )
 
@@ -34,10 +33,10 @@ vigilance_pred_only$upper <- plogis(pred_with_se$fit + 1.96 * pred_with_se$se.fi
 
 #reorder predator cues for graphing
 vigilance_pred_only <- vigilance_pred_only%>%
-  mutate(predator_cue = factor(predator_cue, levels = c("Leopard", "Cheetah", "Lion","Wild dog","Hyena", "Control"))) 
+  mutate(predator_cue = factor(predator_cue, levels = c("Cheetah", "Wild dog","Hyena", "Leopard", "Lion", "Control"))) 
 
 #plot for predicted vigilance by predator cue
-predicted_vigilance_pred_plot <-
+predicted_vigilance_pred_year_plot <-
   ggplot(vigilance_pred_only, aes(x = predator_cue, y = predicted, color = factor(year))) +
   geom_point(position = position_dodge(width = 0.5), size = 3) +
   geom_errorbar(aes(ymin = lower, ymax = upper), 
@@ -53,6 +52,102 @@ predicted_vigilance_pred_plot <-
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = "bottom" 
+  )
+
+#PROPORTION VIGILANCE BY PREDATOR CUE
+# Create a new dataset with combinations of explanatory variables
+vigilance_pred_only <- expand.grid(
+  predator_cue = unique(Baboon_vigilance_stats_both$predator_cue), # Vary predator cue
+  Habitat = factor("Open", levels = levels(Baboon_vigilance_stats_both$Habitat)),  
+  age_sex_class = factor("Female_Adult_no_offspring", levels = levels(Baboon_vigilance_stats_both$age_sex_class)),  
+  group_number = mean(Baboon_vigilance_stats_both$group_number, na.rm = TRUE),
+  year = factor("2021", levels = c("2021", "2024"))
+)
+
+View(vigilance_pred_only)
+View(Baboon_vigilance_stats_both)
+# Get predictions on the response scale
+vigilance_pred_only$predicted <- predict(Vigilance_global_model_both, 
+                                         newdata = vigilance_pred_only, 
+                                         type = "response", 
+                                         re.form = NA)  # Exclude random effects
+
+# Get predictions with standard errors
+pred_with_se <- predict(Vigilance_global_model_both, 
+                        newdata = vigilance_pred_only, 
+                        type = "link",  # Get predictions on link scale for CIs
+                        se.fit = TRUE,
+                        re.form = NA)
+
+# Add confidence intervals on response scale
+vigilance_pred_only$se <- pred_with_se$se.fit
+vigilance_pred_only$lower <- plogis(pred_with_se$fit - 1.96 * pred_with_se$se.fit)  # Back-transform to response
+vigilance_pred_only$upper <- plogis(pred_with_se$fit + 1.96 * pred_with_se$se.fit)
+
+#reorder predator cues for graphing
+vigilance_pred_only <- vigilance_pred_only%>%
+  mutate(predator_cue = factor(predator_cue, levels = c("Cheetah", "Wild dog","Hyena", "Leopard", "Lion", "Control"))) 
+
+#plot for predicted vigilance by predator cue
+predicted_vigilance_pred_plot <-
+  ggplot(vigilance_pred_only, aes(x = predator_cue, y = predicted)) +
+  geom_point(size = 3, color = "#023743") +  # Set a fixed color
+  geom_errorbar(aes(ymin = lower, ymax = upper), 
+                width = 0.2) +
+  labs(
+    x = "Predator Cue",
+    y = "Predicted Proportion Vigilant"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"  # Remove legend
+  )
+
+#PROPORTION VIGILANCE BY YEAR
+# Create a new dataset with combinations of explanatory variables
+vigilance_year_only <- expand.grid(
+  predator_cue = factor("Control", levels = levels(Baboon_vigilance_stats_both$predator_cue)),
+  Habitat = factor("Open", levels = levels(Baboon_vigilance_stats_both$Habitat)),  
+  age_sex_class = factor("Female_Adult_no_offspring", levels = levels(Baboon_vigilance_stats_both$age_sex_class)),  
+  group_number = mean(Baboon_vigilance_stats_both$group_number, na.rm = TRUE),
+  year = unique(Baboon_vigilance_stats_both$year)
+)
+
+View(vigilance_pred_only)
+View(Baboon_vigilance_stats_both)
+# Get predictions on the response scale
+vigilance_year_only$predicted <- predict(Vigilance_global_model_both, 
+                                         newdata = vigilance_year_only, 
+                                         type = "response", 
+                                         re.form = NA)  # Exclude random effects
+
+# Get predictions with standard errors
+year_with_se <- predict(Vigilance_global_model_both, 
+                        newdata = vigilance_year_only, 
+                        type = "link",  # Get predictions on link scale for CIs
+                        se.fit = TRUE,
+                        re.form = NA)
+
+# Add confidence intervals on response scale
+vigilance_year_only$se <- year_with_se$se.fit
+vigilance_year_only$lower <- plogis(year_with_se$fit - 1.96 * year_with_se$se.fit)  # Back-transform to response
+vigilance_year_only$upper <- plogis(year_with_se$fit + 1.96 * year_with_se$se.fit)
+
+#plot for predicted vigilance by year
+predicted_vigilance_year_plot <-
+  ggplot(vigilance_year_only, aes(x = year, y = predicted)) +
+  geom_point(size = 3, color = "#023743") +  # Set a fixed color
+  geom_errorbar(aes(ymin = lower, ymax = upper), 
+                width = 0.2) +
+  labs(
+    x = "Year",
+    y = "Predicted Proportion Vigilant"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"  # Remove legend
   )
 
 #PROPORTION VIGILANCE BY HABITAT
@@ -159,7 +254,7 @@ predicted_vigilance_prey_plot <-
 
 
 
-#LATENCY BY PREDATOR CUE
+#LATENCY BY PREDATOR CUE BY YEAR
 latency_pred_only <- expand.grid(
   predator_cue = unique(Baboon_flight_stats_both$predator_cue), # Vary predator cue
   Habitat = factor("Open", levels = levels(Baboon_flight_stats_both$Habitat)),  
@@ -188,10 +283,10 @@ latency_pred_only$upper <- latency_with_se$fit + 1.96 * latency_with_se$se.fit
 
 #reorder predator cues for graphing
 latency_pred_only <- latency_pred_only%>%
-  mutate(predator_cue = factor(predator_cue, levels = c("Leopard", "Cheetah", "Lion","Wild dog","Hyena", "Control"))) 
+  mutate(predator_cue = factor(predator_cue, levels = c("Cheetah", "Wild dog","Hyena", "Leopard", "Lion","Control"))) 
 
 #plot for latency to flee by predator cue
-predicted_latency_pred_plot <-
+predicted_latency_pred_year_plot <-
   ggplot(latency_pred_only, aes(x = predator_cue, y = predicted, color = factor(year))) +
   geom_point(position = position_dodge(width = 0.5), size = 3) +
   geom_errorbar(aes(ymin = lower, ymax = upper), 
@@ -204,6 +299,99 @@ predicted_latency_pred_plot <-
   ) +
   theme_minimal() +
   scale_color_manual(values = c("2021" = "#72874EFF", "2024" = "#476F84FF")) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom" 
+  )
+
+#LATENCY BY PREDATOR CUE
+latency_pred_only <- expand.grid(
+  predator_cue = unique(Baboon_flight_stats_both$predator_cue), # Vary predator cue
+  Habitat = factor("Open", levels = levels(Baboon_flight_stats_both$Habitat)),  
+  age_sex_class = factor("Female_Adult_no_offspring", levels = levels(Baboon_flight_stats_both$age_sex_class)),  
+  group_number = mean(Baboon_flight_stats_both$group_number, na.rm = TRUE),
+  year = factor("2021", levels = c("2021", "2024")) 
+)
+
+# Get predictions on the response scale
+latency_pred_only$predicted <- predict(Latency_global_model_both, 
+                                       newdata = latency_pred_only, 
+                                       type = "response", 
+                                       re.form = NA)  # Exclude random effects
+
+# Get predictions with standard errors
+latency_with_se <- predict(Latency_global_model_both, 
+                           newdata = latency_pred_only, 
+                           type = "link",  # Get predictions on link scale for CIs
+                           se.fit = TRUE,
+                           re.form = NA)
+
+# Add confidence intervals on response scale
+latency_pred_only$se <- latency_with_se$se.fit
+latency_pred_only$lower <- latency_with_se$fit - 1.96 * latency_with_se$se.fit
+latency_pred_only$upper <- latency_with_se$fit + 1.96 * latency_with_se$se.fit
+
+#reorder predator cues for graphing
+latency_pred_only <- latency_pred_only%>%
+  mutate(predator_cue = factor(predator_cue, levels = c("Cheetah", "Wild dog","Hyena", "Leopard", "Lion","Control"))) 
+
+#plot for latency to flee by predator cue
+predicted_latency_pred_plot <-
+  ggplot(latency_pred_only, aes(x = predator_cue, y = predicted)) +
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  geom_errorbar(aes(ymin = lower, ymax = upper), 
+                width = 0.2, 
+                position = position_dodge(width = 0.5)) +
+  labs(
+    x = "Predator Cue",
+    y = "Predicted Latency to Flee"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom" 
+  )
+
+#LATENCY BY YEAR
+latency_year_only <- expand.grid(
+  predator_cue = factor("Control", levels = levels(Baboon_flight_stats_both$predator_cue)), 
+  Habitat = factor("Open", levels = levels(Baboon_flight_stats_both$Habitat)),  
+  age_sex_class = factor("Female_Adult_no_offspring", levels = levels(Baboon_flight_stats_both$age_sex_class)),  
+  group_number = mean(Baboon_flight_stats_both$group_number, na.rm = TRUE),
+  year = unique(Baboon_flight_stats_both$year)
+)
+
+# Get predictions on the response scale
+latency_year_only$predicted <- predict(Latency_global_model_both, 
+                                       newdata = latency_year_only, 
+                                       type = "response", 
+                                       re.form = NA)  # Exclude random effects
+
+# Get predictions with standard errors
+latency_with_se <- predict(Latency_global_model_both, 
+                           newdata = latency_year_only, 
+                           type = "link",  # Get predictions on link scale for CIs
+                           se.fit = TRUE,
+                           re.form = NA)
+
+# Add confidence intervals on response scale
+latency_year_only$se <- latency_with_se$se.fit
+latency_year_only$lower <- latency_with_se$fit - 1.96 * latency_with_se$se.fit
+latency_year_only$upper <- latency_with_se$fit + 1.96 * latency_with_se$se.fit
+
+
+#plot for latency to flee by year
+predicted_latency_year_plot <-
+  ggplot(latency_year_only, aes(x = year, y = predicted)) +
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  geom_errorbar(aes(ymin = lower, ymax = upper), 
+                width = 0.2, 
+                position = position_dodge(width = 0.5)) +
+  labs(
+    x = "Year",
+    y = "Predicted Latency to Flee"
+  ) +
+  theme_minimal() +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = "bottom" 
@@ -309,7 +497,7 @@ predicted_latency_prey_plot <-
 
 
 
-#FREQUENCY BY PREDATOR CUE
+#FREQUENCY BY PREDATOR CUE BY YEAR
 frequency_pred_only <- expand.grid(
   predator_cue = unique(Baboon_frequency_stats_both$predator_cue), # Vary predator cue
   Habitat = factor("Open", levels = levels(Baboon_frequency_stats_both$Habitat)),  
@@ -342,10 +530,10 @@ frequency_pred_only$upper_resp <- plogis(frequency_pred_only$upper)
 
 #reorder predator cues for graphing
 frequency_pred_only <- frequency_pred_only%>%
-  mutate(predator_cue = factor(predator_cue, levels = c("Leopard", "Cheetah", "Lion","Wild dog","Hyena", "Control"))) 
+  mutate(predator_cue = factor(predator_cue, levels = c("Cheetah","Wild dog","Hyena", "Leopard", "Lion", "Control"))) 
 
 #plot frequency of flight by predator cue
-predicted_frequency_pred_plot <-
+predicted_frequency_pred_year_plot <-
   ggplot(frequency_pred_only, aes(x = predator_cue, y = predicted, color = factor(year))) +
   geom_point(position = position_dodge(width = 0.5), size = 3) +
   geom_errorbar(aes(ymin = lower_resp, ymax = upper_resp), 
@@ -353,6 +541,95 @@ predicted_frequency_pred_plot <-
                 position = position_dodge(width = 0.5)) +
   scale_color_manual(values = c("2021" = "#72874E", "2024" = "#476F84")) +
   labs(x = "Predator Cue", y = "Predicted Frequency of Flight", color = "Year") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#FREQUENCY BY PREDATOR CUE
+frequency_pred_only <- expand.grid(
+  predator_cue = unique(Baboon_frequency_stats_both$predator_cue), # Vary predator cue
+  Habitat = factor("Open", levels = levels(Baboon_frequency_stats_both$Habitat)),  
+  age_sex_class = factor("Female_Adult_no_offspring", levels = levels(Baboon_frequency_stats_both$age_sex_class)),  
+  group_number = mean(Baboon_frequency_stats_both$group_number, na.rm = TRUE),
+  year = factor("2021", levels = c("2021", "2024"))
+)
+
+# Get predictions on the response scale
+frequency_pred_only$predicted <- predict(Frequency_global_model_both, 
+                                         newdata = frequency_pred_only, 
+                                         type = "response", 
+                                         re.form = NA)  # Exclude random effects
+
+# Get predictions with standard errors
+frequency_with_se <- predict(Frequency_global_model_both, 
+                             newdata = frequency_pred_only, 
+                             type = "link",  # Get predictions on link scale for CIs
+                             se.fit = TRUE,
+                             re.form = NA)
+
+# Add confidence intervals on response scale
+frequency_pred_only$se <- frequency_with_se$se.fit
+frequency_pred_only$lower <- frequency_with_se$fit - 1.96 * frequency_with_se$se.fit
+frequency_pred_only$upper <- frequency_with_se$fit + 1.96 * frequency_with_se$se.fit
+
+#convert onto same scale
+frequency_pred_only$lower_resp <- plogis(frequency_pred_only$lower)
+frequency_pred_only$upper_resp <- plogis(frequency_pred_only$upper)
+
+#reorder predator cues for graphing
+frequency_pred_only <- frequency_pred_only%>%
+  mutate(predator_cue = factor(predator_cue, levels = c("Cheetah","Wild dog","Hyena", "Leopard", "Lion", "Control"))) 
+
+#plot frequency of flight by predator cue
+predicted_frequency_pred_plot <-
+  ggplot(frequency_pred_only, aes(x = predator_cue, y = predicted)) +
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  geom_errorbar(aes(ymin = lower_resp, ymax = upper_resp), 
+                width = 0.2, 
+                position = position_dodge(width = 0.5)) +
+  labs(x = "Predator Cue", y = "Predicted Frequency of Flight") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#FREQUENCY BY YEAR
+frequency_year_only <- expand.grid(
+  predator_cue = factor("Control", levels = levels(Baboon_frequency_stats_both$predator_cue)), 
+  Habitat = factor("Open", levels = levels(Baboon_frequency_stats_both$Habitat)),  
+  age_sex_class = factor("Female_Adult_no_offspring", levels = levels(Baboon_frequency_stats_both$age_sex_class)),  
+  group_number = mean(Baboon_frequency_stats_both$group_number, na.rm = TRUE),
+  year = unique(Baboon_frequency_stats_both$year)
+)
+
+# Get predictions on the response scale
+frequency_year_only$predicted <- predict(Frequency_global_model_both, 
+                                         newdata = frequency_year_only, 
+                                         type = "response", 
+                                         re.form = NA)  # Exclude random effects
+
+# Get predictions with standard errors
+frequency_with_se <- predict(Frequency_global_model_both, 
+                             newdata = frequency_year_only, 
+                             type = "link",  # Get predictions on link scale for CIs
+                             se.fit = TRUE,
+                             re.form = NA)
+
+# Add confidence intervals on response scale
+frequency_year_only$se <- frequency_with_se$se.fit
+frequency_year_only$lower <- frequency_with_se$fit - 1.96 * frequency_with_se$se.fit
+frequency_year_only$upper <- frequency_with_se$fit + 1.96 * frequency_with_se$se.fit
+
+#convert onto same scale
+frequency_year_only$lower_resp <- plogis(frequency_year_only$lower)
+frequency_year_only$upper_resp <- plogis(frequency_year_only$upper)
+
+
+#plot frequency of flight by predator cue
+predicted_frequency_year_plot <-
+  ggplot(frequency_year_only, aes(x = year, y = predicted)) +
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  geom_errorbar(aes(ymin = lower_resp, ymax = upper_resp), 
+                width = 0.2, 
+                position = position_dodge(width = 0.5)) +
+  labs(x = "Year", y = "Predicted Frequency of Flight") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -457,10 +734,6 @@ predicted_frequency_prey_plot <-
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-
-
 
 
 

@@ -8,7 +8,10 @@ library(stringr)
 library(tidyverse)
 
 #DATAFRAME FOR VIGILANCE ANALYSIS
+count <- nrow(Baboon_vigilance_stats_both[Baboon_vigilance_stats_both$age_sex_class == "Female_Adult_with_offspring", ])
+print(count)
 
+View(Final_2024)
 #filter videos that have No_sound or sound.quality = poor as they will not be included in analysis
 Baboon_vigilance_data_24 <- Final_2024 %>%
   filter(!(sound_quality %in% c("Poor", "None")))

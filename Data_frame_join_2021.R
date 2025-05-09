@@ -116,3 +116,5 @@ Final_2021 <- Final_2021 %>%
 Final_2021 <- Final_2021 %>%
   mutate(Predator.cue = if_else(is.na(Predator.cue), "No_sound", Predator.cue))
 
+View(Final_2021)
+
